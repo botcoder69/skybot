@@ -1,0 +1,106 @@
+
+const { Minion } = require('../../SkyblockHelper/src/index.js');
+
+module.exports = new Minion(
+	{
+		search: [],
+		group: "Minion",
+		name: ` minion`,
+		keyName: "inv",
+		produces: {
+			keyName: "",
+			displayName: "",
+			emoji: "",
+		},
+		description: "",
+		emoji: {
+			name: {
+				placed: "",
+				inventory: ""
+			},
+			url: {
+				placed: "",
+				inventory: ""
+			}
+		},
+		NPC: {
+			sell: {
+				sellable: false,
+				price: 0
+			},
+			buy: {
+				buyable: false,
+				price: 0
+			}
+		},
+		sellall: {
+			included: false
+		},
+		crafting: {
+			type: `oneItem`,
+			materials: [[`wooden pickaxe`, `woodenPickaxe`, `<:Wooden_Pickaxe:817217441394196572>`, 1], [` wood`, `Wood`, ``, 80]],
+			outputs: 1
+		},
+		tiers: {
+			i: {
+				timeBetweenActions: 14,
+				maxStorage: 64,
+				upgradeAmount: 160,
+				itemKeyName: "<name>"
+			},
+			ii: {
+				timeBetweenActions: 14,
+				maxStorage: 192,
+				upgradeAmount: 320,
+				itemKeyName: "<name>"
+			},
+			iii: {
+				timeBetweenActions: 12,
+				maxStorage: 192,
+				upgradeAmount: 512,
+				itemKeyName: "<name>"
+			},
+			iv: {
+				timeBetweenActions: 12,
+				maxStorage: 384,
+				upgradeAmount: 8,
+				itemKeyName: "enchanted<capitalname>"
+			},
+			v: {
+				timeBetweenActions: 10,
+				maxStorage: 384,
+				upgradeAmount: 16,
+				itemKeyName: "enchanted<capitalname>"
+			},
+			vi: {
+				timeBetweenActions: 10,
+				maxStorage: 576,
+				upgradeAmount: 32,
+				itemKeyName: "enchanted<capitalname>"
+			},
+			vii: {
+				timeBetweenActions: 9,
+				maxStorage: 576,
+				upgradeAmount: 64,
+				itemKeyName: "enchanted<capitalname>"
+			},
+			viii: {
+				timeBetweenActions: 9,
+				maxStorage: 768,
+				upgradeAmount: 128,
+				itemKeyName: "enchanted<capitalname>"
+			},
+			ix: {
+				timeBetweenActions: 8,
+				maxStorage: 768,
+				upgradeAmount: 256,
+				itemKeyName: "enchanted<capitalname>"
+			},
+			x: {
+				timeBetweenActions: 8,
+				maxStorage: 960
+			}
+		},
+		includeInParsing: false
+	}
+);

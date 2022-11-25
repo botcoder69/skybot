@@ -1,0 +1,66 @@
+
+const { Sword } = require('../../SkyblockHelper/src/index.js');
+
+module.exports = new Sword(
+	{
+		group: `Sword`,
+		name: ` sword`,
+		keyName: `Sword`,
+		description: ``,
+		rarity: `Common`,
+		emoji: {
+			name: ``,
+			url: ``,
+		},
+		NPC: {
+			sell: {
+				sellable: false,
+				price: 0
+			},
+			buy: {
+				buyable: false,
+				price: 0
+			}
+		},
+		sellall: {
+			included: false,
+		},
+		crafting: {
+			type: `one-to-one`,
+			materials: [
+				[`stick`, `stick`, `<:Stick:817260386180792320>`, 1],
+				[``, ``, ``, 2]
+			],
+			outputs: 1
+		},
+		sword: {
+			baseDamage: 20,
+		},
+		equipData: {
+			key: `sword`,
+			value: {
+				name: ` sword`, 
+				keyName: `Sword`,
+				emoji: ``,
+				baseDamage: 20,
+				enchantments: []
+			} 
+		},
+		swordFunc: {
+		/**
+		 * This is the stats displayed when someone uses `sword` on this sword.
+		 */
+			getSwordStats() {
+				return `Damage: +20`;
+			},
+			/**
+		 * This is the stats displayed when someone uses `examine` on this sword
+		 */
+			getExamineStats() {
+				return `Damage: +20`;
+			}
+		},
+		key: `sword`,
+		includeInParsing: true
+	}
+);

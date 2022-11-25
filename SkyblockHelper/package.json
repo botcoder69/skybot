@@ -1,0 +1,29 @@
+{
+  "name": "skyblockhelper",
+  "version": "13.0.0",
+  "description": "Contains helper utilites for Skybot",
+  "main": "./src/index",
+  "typings": "./typings/index.d.ts",
+  "exports": {
+    ".": [
+      {
+        "require": "./src/index.js",
+        "import": "./src/index.mjs"
+      },
+      "./src/index.js"
+    ],
+    "./esm": "./src/index.mjs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+	"discord.js": "^14.0.3",
+	"@replit/database": "^2.0.1",
+	"chalk": "^4.1.0",
+	"node-fetch": "^2.6.5"
+  }
+}

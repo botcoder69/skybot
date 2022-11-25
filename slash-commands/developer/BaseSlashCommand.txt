@@ -1,0 +1,40 @@
+/* eslint-disable no-unused-vars */
+const { ChatInputCommandInteraction, SlashCommandBuilder } = require('discord.js');
+const SkyblockHelper = require('../../SkyblockHelper/src/index');
+
+module.exports = {
+	data: new SlashCommandBuilder()
+		.setName(``)
+		.setDescription(``)
+		.addSubcommandGroup(subcommandGroup => subcommandGroup
+			.setName(``)
+			.setDescription(``)
+			.addSubcommand(subcommand => subcommand
+				.setName(``)
+				.setDescription(``)
+				.addStringOption(option => option
+					.setName(``)
+					.setDescription(``)
+				)	
+			)	
+		),
+	group: ``,
+	cooldown: 0,
+	cooldownMessage: ``,
+	tutorial: {
+		embeds: [],
+		key: ``
+	},
+	require: {
+		start: true,
+		update: `>=v`
+	},
+	/**
+	 * @param {ChatInputCommandInteraction} interaction 
+	 * @param {any} db
+	 * @param {string} maid
+	 */
+	async execute(interaction, db, maid) {
+		
+	}
+};

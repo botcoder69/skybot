@@ -1,0 +1,35 @@
+
+const { Item } = require('../../SkyblockHelper/src/index.js');
+
+module.exports = new Item(
+	{
+		group: `Item`,
+		name: ``,
+		keyName: ``,
+		description: ``,
+		rarity: ``,
+		emoji: {
+			name: ``,
+			url: ``,
+		},
+		NPC: {
+			sell: {
+				sellable: false,
+				price: 0
+			},
+			buy: {
+				buyable: false,
+				price: 0
+			}
+		},
+		sellall: {
+			included: false,
+			filterGroup: ``
+		},
+		crafting: {
+			type: `oneItem`,
+			materials: [[]]
+		},
+		includeInParsing: false
+	}
+);
