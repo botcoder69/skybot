@@ -4,7 +4,7 @@
 
 ## Where's config.json?
 That was included in the .gitignore file, the Discord bot token exists there, having it here is a leak. For the other items inside the code, refer below.
-```
+```json
 {
 	"betaToken": "never gonna give you up (insert your token here)",
 	"guildId": "(insert guild id)",
