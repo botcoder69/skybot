@@ -1,5 +1,5 @@
 
-import Mob from "./Mob";
+import Mob from "../structures/Mob";
 import SkybotStatusEffect from "./SkybotStatusEffect";
 
 declare class SkybotStatusEffectHandler {

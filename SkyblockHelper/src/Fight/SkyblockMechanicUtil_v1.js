@@ -2,8 +2,8 @@
 // eslint-disable-next-line no-unused-vars
 const { Message, EmbedBuilder, ChatInputCommandInteraction, User } = require("discord.js");
 const { firstStrike, sharpness, execute, critical, lifeSteal } = require('./EnchantmentUtil');
-const { commafy, sendNotification, sliceIntoChunks, getSettingValue, removeArrayElement } = require('./Functions');
-const SkyblockTypes = require('./SkyblockTypes');
+const { commafy, sendNotification, sliceIntoChunks, getSettingValue, removeArrayElement } = require('../utils/Functions');
+const SkyblockTypes = require('../utils/SkyblockTypes');
 const SkybotStatusEffect = require("./SkybotStatusEffect");
 
 let registeredStatusEffects = [];
@@ -383,18 +383,18 @@ class SkyblockMechanicUtil extends null {
 
 			mob.statusEffects = mob.statusEffects
 				.filter(effectIdOrStatusEffect => !(effectIdOrStatusEffect instanceof SkybotStatusEffect))
-				.tap(console.log)
+				// .tap(console.log)
 				// eslint-disable-next-line no-loop-func
 				.map(effectId => registeredStatusEffects
 					.find(statusEffect => statusEffect.id === effectId)
 				)
-				.tap(console.log)
+				// .tap(console.log)
 				.map(statusEffect => {
 					statusEffect.endIndex = statusEffect.duration + index;
 
 					return statusEffect;
-				})
-				.tap(console.log);
+				});
+			// .tap(console.log);
 
 			const { periodicDamage: addedPeriodicDamage } = handleStatusEffects(mob, index, baseDamage, addedDamage, mobObject, fightActions);
 

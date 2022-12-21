@@ -1,5 +1,5 @@
 
-/* eslint-disable no-await-in-loop, no-console */
+/* eslint-disable no-await-in-loop, no-console, no-unused-vars */
 /* Require all the necessary stuff from the libraries */
 const timeCodeStarted = Date.now();
 
@@ -7,7 +7,6 @@ const CodeHandler = require('./Handlers');
 const fs = require('fs');
 const Util = require('./Util');
 const { Client, Collection, version: DiscordJSVersion, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ActivityType, PresenceUpdateStatus } = require('discord.js');
-// eslint-disable-next-line no-unused-vars
 const { CachedDatabase, Functions, SkyblockTypes, SkybotDatabase, SkybotDatabaseHandler, extendNativeClasses, version: SkyblockHelperVersion } = require('./SkyblockHelper/src/index');
 
 // const wait = require('util').promisify(setTimeout);
@@ -116,13 +115,10 @@ console.log = (...data) => {
 */
 
 /* Initiate some classes from the libraries */
-Functions.databaseResync(
-	`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2Njg5NDEyNTksImlhdCI6MTY2ODgyOTY1OSwiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.kqu3OgtSveWxnOJ50zU-eXN9GmTqBlxavSin7HG00Mk9BE2ssk6pk1BkNQ56aLVfpPIWjoX-QlvBv7sCUbVbvQ`,
-	`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2Njg5NDI1NDMsImlhdCI6MTY2ODgzMDk0MywiZGF0YWJhc2VfaWQiOiJhZTE1MzFjZS1lNWJlLTRhOTctOTQ2Ny0xNDEzMmMzNTM5YTUiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJOb2RlLTE2NjEtQ3VycmVuY3ktQm90In0.6wKqZXpMpl3nCpo3TmnYWMKeWF3VcFjZ8_n9LjGz8H7ukjU4BJSv6VzOhlXERCTspAPn8TZhg7day953RYgesA`
-);
-
+const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzE2NTQ3MTYsImlhdCI6MTY3MTU0MzExNiwiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.ulyYjdhZ69zAx1BBDjtuyMksfdeivbXdvLDVCwAI7A1IUmLKCeF5I9carfIvlEanXtiCFsnbd-BPHkl0WODghg`);
+/*
 const db = new SkybotDatabaseHandler()
-	.setDebugMode(true)
+	.setDebugMode(false)
 	.setRequestRetries(Infinity)
 	.setKeyTreshold(2500)
 	.setDatabases(
@@ -214,9 +210,7 @@ extendNativeClasses(
 		extendObject: false
 	}
 );
-
-// db.set('518736428721635338', JSON.parse(JSON.stringify(maidObj_v12)));
-// db.set('741536009824501832', JSON.parse(JSON.stringify(maidObj_v12)));
+*/
 
 const client = new SkybotClient(
 	{ 
@@ -389,7 +383,8 @@ client.once('ready', async () => {
 	client.console.push(`${getUTCTime()} [Database][Logging] | Initializing Database...`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Initializing Database...`);
 
-	await db.init();
+	await db.fetchDatabaseEntries([`518736428721635338`]);
+	// await db.init();
 
 	client.console.push(`${getUTCTime()} [Database][Logging] | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
@@ -438,7 +433,8 @@ client.on('interactionCreate', async interaction => {
 
 	const maid = interaction.user.id;
 	const maidObj = await db.get(maid) ?? {};
-	const shouldBeNull = await db.get(`${maid}start`) ?? null;
+
+	// const shouldBeNull = await db.get(`${maid}start`) ?? null;
 	const { start, update, tutorial } = maidObj;
 	
 	const commandInteraction = interaction.isChatInputCommand();
@@ -449,12 +445,14 @@ client.on('interactionCreate', async interaction => {
 	
 		if (!slashCommand) return;
 
+		/* Is now comment since no person in the current SkybotDatabase is proved to be using the legacy key system.
 		if (
 			shouldBeNull !== null && 
 			interaction.commandName !== `misc` && 
 			interaction.options.getSubcommandGroup(false) !== `fix` && 
 			interaction.options.getSubcommand(false) !== `profile`
 		) return interaction.reply(`Hello ${interaction.user}, it seems like you're using the legacy database key system! Please use the \`/fix database\` command in order to update your database keys to the latest version.`);
+		*/
 
 		if (!tutorial && !start && (interaction.commandName !== `tutorial` && interaction.commandName !== `dev`)) return interaction.reply(`Hello ${interaction.user}, it seems like you are new! If you want to learn how to play Skybot, you can do so by using \`/tutorial\`!`);
 

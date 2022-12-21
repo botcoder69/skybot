@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 
 const { Collection } = require('discord.js');
-const Functions = require('./Functions');
+const Functions = require('../utils/Functions');
 const SkyblockMechanicUtil = require('./SkyblockMechanicUtil');
 const EventEmitter = require('events');
 

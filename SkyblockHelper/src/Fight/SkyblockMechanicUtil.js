@@ -4,7 +4,7 @@ const SkyblockHelperError = require('../errors/SkyblockHelperError');
 const Sword = require('../structures/Sword');
 const Mob = require('./Mob');
 const { firstStrike, sharpness, critical, execute, lifeSteal } = require('./EnchantmentUtil');
-const { commafy, sliceIntoChunks, getRandomNumber } = require('./Functions');
+const { commafy, sliceIntoChunks, getRandomNumber } = require('../utils/Functions');
 let registeredStatusEffects = [];
 
 class SkyblockMechanicUtil {

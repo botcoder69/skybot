@@ -1,6 +1,6 @@
 
 // REPLACE WHEN MOVING FILE
-const Functions = require('./Functions');
+const Functions = require('../utils/Functions');
 const SkybotStatusEffect = require('./SkybotStatusEffect');
 
 class SkybotStatusEffectHandler {

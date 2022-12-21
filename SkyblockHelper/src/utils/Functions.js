@@ -826,6 +826,7 @@ class Functions {
 	}
 
 	static async request(url, requestData, retryMaximum, totalRetries=0) {
+		console.log(`Sending a request to ${url}. Retry Count: ${totalRetries}, Maximum Retries: ${retryMaximum}`);
 		const controller = new AbortController();
 		const timeout = setTimeout(() => {
 			controller.abort();
@@ -845,20 +846,20 @@ class Functions {
 			 */
 			const response = await fetch(url, requestData);
 
-			if (!response.ok) {
-				throw new HTTPResponseError(response, requestData, url);
-			} else {
-				// console.log(`Functions.request() =>`, response);
+			console.log(`Current response status: ${response.status}`);
+
+			if ((500 <= response.status && response.status <= 599) || response.ok) {
 				return response;
+			} else {
+				throw new HTTPResponseError(response, requestData, url);
 			}
 		} catch (error) {
-			const errorsToBeChecked = error instanceof HTTPResponseError || error instanceof Error;
-			const propertiesToCheck = error.name === 'AbortError' || error.message.startsWith('502 Bad Gateway.');
 			const retriesOverTotalR = retryMaximum >= totalRetries;
 
-			if (errorsToBeChecked && propertiesToCheck && retriesOverTotalR) {
+
+			if (retriesOverTotalR) {
 				// eslint-disable-next-line no-return-await, no-plusplus
-				return await Functions.request(url, requestData, retryMaximum, ++totalRetries);
+				return (await Functions.request(url, requestData, retryMaximum, ++totalRetries));
 			}
 		} finally {
 			clearTimeout(timeout);

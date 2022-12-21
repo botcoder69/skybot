@@ -180,9 +180,6 @@ class SelectMenuConfirmation extends EventEmitter {
 
 		const dataToSend = this.menuMessage;
 
-		/**
-		 * @type {Message}
-		 */
 		const sent = await interaction.reply(dataToSend);
 
 		const selectFilter = i => {
@@ -222,7 +219,7 @@ class SelectMenuConfirmation extends EventEmitter {
 				}
 			}
 
-			console.log(selectRow.components[0]);
+			// console.log(selectRow.components[0]);
 	
 			for (let i = 0; i < selectRow.components[0].options.length; i++) {
 				selectRow.components[0].options[i].data.default = false;

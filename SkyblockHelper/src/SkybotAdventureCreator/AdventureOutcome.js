@@ -1,3 +1,4 @@
+
 const SkyblockHelperError = require("../errors/SkyblockHelperError");
 
 class AdventureOutcome {

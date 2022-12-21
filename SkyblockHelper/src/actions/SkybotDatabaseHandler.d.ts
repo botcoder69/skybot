@@ -1,6 +1,6 @@
 
 import { Collection } from 'discord.js';
-import SkybotDatabase from './SkybotDatabase';
+import SkybotDatabase from '../actions/SkybotDatabase';
 
 declare class SkybotDatabaseHandler<Datatype = any> {
 	public constructor();

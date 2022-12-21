@@ -1,6 +1,5 @@
-/* eslint-disable no-console */
 
-/* eslint-disable class-methods-use-this, no-unused-vars */
+/* eslint-disable class-methods-use-this, no-unused-vars, no-console */
 const { ChatInputCommandInteraction, Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 const SkyblockHelperError = require('../errors/SkyblockHelperError');
 const AdventureOutcome = require('./AdventureOutcome');

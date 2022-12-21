@@ -1,10 +1,9 @@
 
-/* eslint-disable no-await-in-loop, no-console */
-
+/* eslint-disable no-await-in-loop, no-console, no-unused-vars */
 const { Collection } = require("discord.js");
 const fetch = require('node-fetch');
 const SkybotDatabase = require("./SkybotDatabase");
-const Functions = require('../utils/Functions');
+// const Functions = require('../utils/Functions');
 
 class SkybotDatabaseHandlerError extends Error {
 	constructor(response, ...args) {

@@ -1,8 +1,8 @@
 
+/* eslint-disable no-unused-vars */
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder } = require('discord.js');
 const Functions = require('../utils/Functions');
-const SelectMenuConfirmation = require('./SelectMenuConfirmation.js');
-// eslint-disable-next-line no-unused-vars
+const SelectMenuConfirmation = require('../actions/SelectMenuConfirmation.js');
 const SkybotAdventureData = require('./SkybotAdventureData');
 
 class SkybotAdventureSelection {
