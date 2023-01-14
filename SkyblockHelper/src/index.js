@@ -51,12 +51,11 @@ const SkybotStatusEffect = require('./Fight/SkybotStatusEffect');
 const SkybotStatusEffectHandler = require('./Fight/SkybotStatusEffectHandler');
 const Crafting = require('./utils/Crafting');
 const extendNativeClasses = require('./utils/extendNativeClasses');
-const { version } = require('../package.json');
+const SkyblockHelperVersion = require('../package.json').version;
 
 
 
-/* Export all values */
-
+/* Export all classes */
 // Randomizers
 exports.Chancemaker = Chancemaker;
 exports.Randomizer = Randomizer;
@@ -115,4 +114,4 @@ exports.SkybotStatusEffect = SkybotStatusEffect;
 exports.SkybotStatusEffectHandler = SkybotStatusEffectHandler;
 exports.Crafting = Crafting;
 exports.extendNativeClasses = extendNativeClasses;
-exports.version = version;
+exports.version = SkyblockHelperVersion;

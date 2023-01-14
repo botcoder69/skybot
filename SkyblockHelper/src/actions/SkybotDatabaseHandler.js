@@ -97,6 +97,8 @@ class SkybotDatabaseHandler {
 
 
 	async get(key) {
+		const startTs = Date.now();
+
 		this.debug(`get() | Finding parent SkybotDatabase for '${key}'`);
 		const parentDatabase = await this.getParentDatabase(key);
 		if (parentDatabase) {
@@ -115,6 +117,8 @@ class SkybotDatabaseHandler {
 		const value = await parentDatabase.database.get(key);
 		this.debug(`get() | 'GET' request complete!`); 
 
+		this.debug(`get() | Finished processing 'GET' function in ${Date.now() - startTs}ms.`);
+
 		return value;
 	}
 
@@ -122,6 +126,8 @@ class SkybotDatabaseHandler {
 	 * @param {SkybotDatabase?} preferredDatabase
 	 */
 	async set(key, value, preferredDatabase=null) {
+		const startTs = Date.now();
+
 		this.debug(`set() | Checking preferred SkybotDatabase for '${key}'`);
 		if (preferredDatabase) {
 			this.debug(`set() | Preferred SkybotDatabase for '${key}' has been found: '${preferredDatabase.friendlyName}'!`);
@@ -167,16 +173,24 @@ class SkybotDatabaseHandler {
 		this.debug(`set() | Sending 'POST' Request to '${database.friendlyName}'...`);
 
 		await database.database.set(key, value);
+
 		this.debug(`set() | 'POST' request complete!`);
 
+
+
 		this.debug(`set() | Checking if '${key}' is new...`);
-		if (!database.keys.includes(key)) {
-			this.debug(`set() | '${key}' exists in '${database.friendlyName}'`);
-			database.keys.push(key);
-			this.debug(`set() | Adding '${key}' to 'keys' property in '${database.friendlyName}'`);
-			database.keyCount += 1;
-			this.debug(`set() | Adding 1 to 'keyCount' property in '${database.friendlyName}'`);
-		} else this.debug(`set() | '${key}' already exists in '${database.friendlyName}'`);
+		
+		if (database.keys.includes(key)) return this.debug(`set() | '${key}' already exists in '${database.friendlyName}'`);
+		
+		this.debug(`set() | '${key}' exists in '${database.friendlyName}'`);
+		database.keys.push(key);
+		this.debug(`set() | Adding '${key}' to 'keys' property in '${database.friendlyName}'`);
+		database.keyCount += 1;
+		this.debug(`set() | Adding 1 to 'keyCount' property in '${database.friendlyName}'`); 
+
+
+
+		this.debug(`get() | Finished processing 'SET' function in ${Date.now() - startTs}ms.`);
 	}
 
 	async delete(key) {
@@ -249,6 +263,8 @@ class SkybotDatabaseHandler {
 	}
 
 	async init() {
+		const startTs = Date.now();
+
 		this.debug(`init() | Initializing all databases...`);
 		for (const database of this.databases) {
 			this.debug(`init() | Initializing '${database.friendlyName}'`);
@@ -281,9 +297,12 @@ class SkybotDatabaseHandler {
 					this.debug(`init() | Value transformation for '${database.friendlyName} complete! Checking next database...'`);
 				} else this.debug(`init() | Value for 'formatKeyValueFn' was not found! Checking next database...`);
 			} else this.debug(`init() | No keys were found inside '${database.friendlyName}'! Checking next database...`);
+
+			database.kvMap = kvMap;
 		}
 
 		this.debug(`init() | All SkybotDatabases have been initialized!`);
+		this.debug(`init() | Finished processing 'INIT' function in ${Date.now() - startTs}ms.`);
 	}
 
 	async getDatabaseStatuses() {

@@ -1,5 +1,5 @@
 
-/* eslint-disable no-unused-vars, no-await-in-loop */
+/* eslint-disable no-unused-vars, no-await-in-loop, no-console */
 const Database = require('@replit/database');
 const { 
 	Client,
@@ -11,27 +11,12 @@ const {
 	EmbedBuilder,
 	Snowflake,
 	ThreadMember,
-	User,
-	Util
+	User
 } = require('discord.js');
 const SkyblockHelperError = require('../errors/SkyblockHelperError');
 const HTTPResponseError = require('../errors/HTTPResponseError');
 const Armor = require('../structures/Armor');
 const fetch = require('node-fetch');
-
-const arrayLastNumber = require('./function/arrayLastNumber');
-const calcTime = require('./function/calcTime');
-const commafy = require('./function/commafy');
-const databaseResync = require('./function/databaseResync');
-const formatSkybotTime = require('./function/formatSkybotTime');
-const getUTCTime = require('./function/getUTCTime');
-const makeid = require('./function/makeid');
-const msToHMSMs = require('./function/msToHMSMs');
-const requireSkillLevel = require('./function/requireSkillLevel');
-const requireToolAndAbove = require('./function/requireToolAndAbove');
-const secondsToHMS = require('./function/secondsToHMS');
-const sliceIntoChunks = require('./function/sliceIntoChunks');
-const toRomanNumeral = require('./function/toRomanNumeral');
 const extendNativeClasses = require('./extendNativeClasses');
 
 extendNativeClasses({ extendArray: true, extendObject: false });
@@ -42,7 +27,11 @@ class Functions {
 	}
 
 	static calcTime(offset) {
-		return calcTime(offset);
+		const d = new Date();
+		const utc = d.getTime() + d.getTimezoneOffset() * 60000;
+		const nd = new Date(utc + 3600000*offset);
+	
+		return nd.toLocaleString();
 	}
 
 	/**
@@ -50,11 +39,16 @@ class Functions {
 	 * @param {number} number
 	 */
 	static commafy(number) {
-		return commafy(number);
+		if (!number) return "0";
+	
+		const str = number.toString().split('.');
+		str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+		return str.join('.');
 	}
 
 	static getUTCTime() {
-		return getUTCTime();
+		const date = new Date();
+		return `${date.getUTCHours()}:${date.getUTCMinutes()}:${date.getUTCSeconds() <= 9 ? `0${date.getUTCSeconds()}` : date.getUTCSeconds()}`;
 	}
 
 	/**
@@ -63,36 +57,49 @@ class Functions {
 	 * @param {string} characters The amount of characters this id has.
 	 */
 	static makeid(length, characters='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') {
-		return makeid(length, characters);
+		const res = [];
+
+		for (let i = 0; i < length; i++) {
+			res.push(
+				characters.charAt(
+					Math.floor(Math.random() * characters.length)
+				)
+			);
+		}
+	
+		return res.join('');
 	}
 
 	static msToHMSMs(ms) {
-		return msToHMSMs(ms);
-	}
+		const hours = parseInt(ms / 3600000);
+		ms = ms % 3600000;
 
-	/**
-	 * Require a user to have a certain skill level to continue executing. If the user passes, returns `true`, otherwise, returns `false`
-	 * @param {string} skill
-	 * @param {number} level
-	 * @param {string} messageAuthorID
-	 * @param {any} db
-	 */
-	static async requireSkillLevel(skill, level, messageAuthorID, db) {
-		return requireSkillLevel(skill, level, messageAuthorID, db);
-	}
+		const minutes = parseInt(ms / 60000);
+		ms = ms % 60000;
 
-	/**
-	 * Require a user to have a certain tool to continue executing. If the user passes, returns `true`, otherwise, returns `false`
-	 * @param {string} tool
-	 * @param {string} messageAuthorID
-	 * @param {any} db
-	 */
-	static async requireToolAndAbove(tool, messageAuthorID, db) {
-		return requireToolAndAbove(tool, messageAuthorID, db);
+		const seconds = parseInt(ms / 1000);
+		ms = ms % 1000;
+
+
+
+		const returnedArray = [];
+
+		if (hours !== 0) returnedArray.push(`${hours} hour${hours === 1 ? "" : "s"}`);
+		if (minutes !== 0) returnedArray.push(`${minutes} minute${minutes === 1 ? "" : "s"}`);
+		if (seconds !== 0) returnedArray.push(`${seconds} second${seconds === 1 ? ", and" : "s, and"}`);
+		if (ms !== 0) returnedArray.push(`${ms} millisecond${ms === 1 ? "" : "s"}`);
+
+		return returnedArray.join(", ");
 	}
 
 	static secondsToHMS(seconds) {
-		return secondsToHMS(seconds);
+		const hours = parseInt( seconds / 3600 );
+		seconds = seconds % 3600; 
+	
+		const minutes = parseInt( seconds / 60 );
+		seconds = seconds % 60;
+		
+		return (`${hours}:${minutes <= 9 ? `0${minutes}` : minutes}:${seconds <= 9 ? `0${seconds}` : seconds}`);	
 	}
 
 	/**
@@ -101,7 +108,12 @@ class Functions {
 	 * @param {number} chunkSize
 	 */
 	static sliceIntoChunks(array, chunkSize) {
-		return sliceIntoChunks(array, chunkSize);
+		const res = [];
+		for (let i = 0; i < array.length; i += chunkSize) {
+			const chunk = array.slice(i, i + chunkSize);
+			res.push(chunk);
+		}
+		return res;
 	}
 
 	/**
@@ -109,16 +121,17 @@ class Functions {
 	 * @param {number} num 
 	 */
 	static toRomanNumeral(num) {
-		return toRomanNumeral(num);
-	}
+		if (isNaN(num)) throw new SkyblockHelperError(`Expected variabe num to be of type integer but recieved type ${typeof num}`);
 
-	/**
-	 * Checks if the last element in an array is a number in a string.
-	 * @deprecated Use arrayValidNumber instead. This argument was fixed to not modify the original array, but it's highly suggested to switch.
-	 * @param {string[]} args 
-	 */
-	static arrayLastNumber(args) {
-		return arrayLastNumber(args);
+		var digits = String(+num).split(""),
+			key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+				"","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+				"","I","II","III","IV","V","VI","VII","VIII","IX"],
+			roman = "",
+			i = 3;
+			// eslint-disable-next-line no-plusplus
+		while (i--) roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+		return Array(+digits.join("") + 1).join("M") + roman;
 	}
 
 	/**
@@ -126,7 +139,15 @@ class Functions {
 	 * @param {string[]} args 
 	 */
 	static arrayValidNumber(args) {
-		return arrayLastNumber(args);
+		let number = args.slice().pop();
+
+		if (!number) return false;
+	
+		number = number.toLowerCase().replace('k', "000");
+		number = number.toLowerCase().replace('m', "000000");
+		number = number.toLowerCase().replace('b', "000000000");
+		
+		return isNaN(number) || number === "Infinity" ? false : true;
 	}
 
 	/**
@@ -139,7 +160,89 @@ class Functions {
 	 * @param {SkybotTimeOptions} options
 	 */
 	static formatSkybotTime(SkybotTimeMs, options) {
-		return formatSkybotTime(SkybotTimeMs, options);
+		let seconds = Math.floor((SkybotTimeMs - 1635120000000) / 1000);
+		const SkybotYears = Math.floor(seconds / 432000);
+		seconds = seconds % 432000;
+		const SkybotMonths = Math.floor(seconds / 37200);
+		seconds = seconds % 37200;
+		const SkybotDays = Math.floor(seconds / 1200);
+		seconds = seconds % 1200;
+		const SkybotHours = Math.floor(seconds / 50);
+		seconds = seconds % 50;
+		const SkybotMinutes = Math.floor(seconds / 25) * 30;
+		seconds = seconds % 25;
+		// console.log(SkybotYears, SkybotMonths, SkybotDays, SkybotHours, SkybotMinutes, seconds);
+	
+		function OrdinalNumber(number) {
+			let return_value;
+			switch (number) {
+			case 1:
+				return_value = `1st`;
+				break;
+			case 2:
+				return_value = `2nd`;
+				break;
+			case 3: 
+				return_value = `3rd`;
+				break;
+			default:
+				return_value = `${number}th`;
+			}
+			return return_value;
+		}
+	
+		/**
+		 * 
+		 * @param {number} SkybotMonths 
+		 * @returns {"Early Spring" | "Spring" | "Late Spring" | "Early Summer" | "Summer" | "Late Summer" | "Early Autumn" | "Autumn" | "Late Autumn" | "Early Winter" | "Winter" | "Late Winter"} 
+		 */
+		function SkyblockSeason(SkybotMonths) {
+			let return_value = "None";
+			switch (SkybotMonths) {
+			case 1:
+				return_value = "Winter";
+				break;
+			case 2:
+				return_value = "Late Winter";
+				break;
+			case 3:
+				return_value = "Early Spring";
+				break;
+			case 4:
+				return_value = "Spring";
+				break;
+			case 5:
+				return_value = "Late Spring";
+				break;
+			case 6:
+				return_value = "Early Summer";
+				break;
+			case 7:
+				return_value = "Summer";
+				break;
+			case 8:
+				return_value = "Late Summer";
+				break;
+			case 9:
+				return_value = "Early Autumn";
+				break;
+			case 10:
+				return_value = "Autumn";
+				break;
+			case 11:
+				return_value = "Late Autumn";
+				break;
+			case 12:
+				return_value = "Early Winter";
+				break;
+			default: 
+				console.log(SkybotMonths);
+			}
+			return return_value;
+		}
+	
+		// eslint-disable-next-line no-nested-ternary
+		return `${SkybotHours <= 12 ? SkybotHours === 0 ? 12 : SkybotHours : SkybotHours - 12}:${SkybotMinutes < 9 ? SkybotMinutes + `0` : SkybotMinutes}${SkybotHours < 12 ? `am` : `pm`}${options.newLine ? `\n` : `, `}${OrdinalNumber(SkybotDays + 1)} of ${SkyblockSeason(SkybotMonths + 1)}, year ${SkybotYears}`;
 	}
 
 	/**
@@ -149,7 +252,35 @@ class Functions {
 	 * @param {boolean} [logResults=false] If you would like to log results of adding keys to the database, simply enable this. Automatically sets to `false` when undefined.
 	 */
 	static async databaseResync(dbUrlToSyncTo, dbUrlToSyncFrom, logResults=false) {
-		return databaseResync(dbUrlToSyncTo, dbUrlToSyncFrom, logResults);
+		if (!dbUrlToSyncTo || !dbUrlToSyncTo.startsWith('https://kv.replit.com/')) throw new TypeError('Expected variable dbUrlToSyncTo to be a string Repl.it Database URL.');
+
+		if (!dbUrlToSyncFrom || !dbUrlToSyncFrom.startsWith('https://kv.replit.com/')) throw new TypeError('Expected variable dbUrlToSyncFrom to be a string Repl.it Database URL.');
+		
+		
+		const oldDatabase = new Database(dbUrlToSyncFrom),
+			newDatabase = new Database(dbUrlToSyncTo),
+			keys = await oldDatabase.list();
+		
+		let successAdd = 0,
+			failureAdd = 0,
+			maxItemAdd = 0;
+		
+		for (const key of keys) {
+			maxItemAdd += 1;
+			try {
+				const value = await oldDatabase.get(key);
+				await newDatabase.set(key, value);
+		
+				if (logResults) console.log(`Successfully set ${key} to the new Database!`);
+		
+				successAdd += 1;
+			} catch (error) {
+				console.log(`An error occured while trying to sync key ${key}! ${error}`);
+				failureAdd += 1;
+			}
+		}
+		
+		if (logResults) console.log(`Successfully added ${successAdd} keys to the new Database, failed to add ${failureAdd} keys to the Database. Handled a total of ${maxItemAdd} keys.`);
 	}
 
 	/**
@@ -553,7 +684,7 @@ class Functions {
 	 * @param {Guild} guild 
 	 * @param {string} commandName 
 	 * @param {import('discord.js').ApplicationCommandPermissionData[]} permissions 
-	 */
+	 * @deprecated Will be removed in SkyblockHelperv13; Discord doesn't allow bots to edit permissions anymore.
 	static async editGuildCommandPermissions(guild, commandName, permissions, editType='add') {
 		if (!(guild instanceof Guild)) throw new SkyblockHelperError(`Expected an instanceof Guild as value for variable "guild"!`, 'ALLOWED_VARIABLE_VALUES');
 	
@@ -581,13 +712,14 @@ class Functions {
 			);
 		}
 	}
+	*/
 	
 	/**
 	 * Sets permissions for a global slash command.
 	 * @param {Client} client 
 	 * @param {string} commandName 
 	 * @param {import('discord.js').ApplicationCommandPermissionData[]} permissions 
-	 */
+	 * @deprecated Will be removed in SkyblockHelperv13; Discord doesn't allow bots to edit permissions anymore.
 	static async editClientCommandPermissions(client, commandName, permissions, editType='add') {
 		// if (!(client instanceof Client)) throw new SkyblockHelperError(`Expected an instanceof Client as value for variable "client"!`, 'ALLOWED_VARIABLE_VALUES');
 	
@@ -610,6 +742,7 @@ class Functions {
 			}
 		}
 	}
+	*/
 	
 	/**
 	 * Fetches an application command from the parentResolvable. If `parentResolvable` is a guild, the command will be fetched from the Guild, otherwise if `parentResolvable` is a client, the command will be fetched from the Client.
@@ -794,7 +927,7 @@ class Functions {
 	 * Reloads an exported SkyblockHelper item with a command.
 	 * @param {*} item 
 	 * @param {*} commandName 
-	 */
+	 * @deprecated Will be removed in SkyblockHelperv13
 	static reloadHelperItemWithCommand(client, item, commandName) {
 		const fs = require('node:fs');
 		const path = require('node:path');
@@ -824,6 +957,7 @@ class Functions {
 
 		delete require.cache[require.resolve(`../../../SkyblockHelper/src/index.js`)];	
 	}
+	*/
 
 	static async request(url, requestData, retryMaximum, totalRetries=0) {
 		console.log(`Sending a request to ${url}. Retry Count: ${totalRetries}, Maximum Retries: ${retryMaximum}`);
@@ -1057,3 +1191,5 @@ module.exports = Functions;
  * @property {string} setting
  * @property {boolean} value
  */
+
+Functions.array

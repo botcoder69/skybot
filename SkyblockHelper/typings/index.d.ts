@@ -255,22 +255,6 @@ declare module 'SkyblockHelper' {
 		 */
 		static makeid(length: number, characters?: string): string
 		static msToHMSMs(ms: number): string
-		/**
-		 * Require a user to have a certain skill level to continue executing. If the user passes, returns `true`, otherwise, returns `false`
-		 * @param {Skill} skill
-		 * @param {number} level
-		 * @param {string} maid
-		 * @param {any} db
-		 */
-		static requireSkillLevel<Skill extends keyof SkillCollections>(skill: Skill, level: number, maid: string, db: any): Promise<boolean>
-		/**
-		 * Require a user to have a certain tool to continue executing. If the user passes, returns `true`, otherwise, returns `false`
-		 * @param {Tool} tool
-		 * @param {string} maid
-		 * @param {any} db
-		 * @deprecated Since v5.0.0 - Use the "toolMap" instead.
-		 */
-		static requireToolAndAbove<Tool extends keyof ToolRequirements>(tool: Tool, maid: string, db: any): Promise<boolean>
 		static secondsToHMS(seconds: number): string
 		/**
 		 * Splits an array into even chunks. Good for pages and your 2048 embed description character limit
@@ -283,12 +267,6 @@ declare module 'SkyblockHelper' {
 		 * @param {number} num 
 		 */
 		static toRomanNumeral(num: number): string
-		/**
-		 * Checks if the last element in an array is a number in a string.
-		 * @param {string[]} args 
-		 * @deprecated Since v4.0.0 - Use arrayValidNumber instead.
-		 */
-		static arrayLastNumber(args: string[]): boolean
 		/**
 		 * Checks if the last element in an array is a number in a string.
 		 * @param {string[]} args 
@@ -484,26 +462,6 @@ declare module 'SkyblockHelper' {
 		static aoran(word: string): 'a' | 'an';
 	
 		static getSettingValue(maidObj: RawUserObj, setting: ValidSettingStrings): boolean;
-	
-		/**
-		 * Sets permissions for a guild slash command.
-		 * @param {Guild} guild The guild you want to edit slash commands in
-		 * @param {string} commandName The name of the slash command you want to edit
-		 * @param {import('discord.js').null[]} permissions The permissions you want to set for the slash command
-		 * @param {'set' | 'add'} editType The type of edit you want to do with this slash command. If you pick 'set', this will use `ApplicationCommandPermissionsManager#set()`, otherwise, if you pick 'add', this will use `ApplicationCommandPermissionsManager#add()`. Defaults to "add"
-		 * @deprecated Discord API v10 removed the usage of editing guild permissions through the bot. 
-		 */
-		static editGuildCommandPermissions(guild: Guild, commandName: string, permissions: null[], editType: 'set' | 'add'): Promise<void>
-	
-		/**
-		 * Sets permissions for a global slash command.
-		 * @param {Client} client The client you want to edit slash commands in
-		 * @param {string} commandName The name of the slash command you want to edit
-		 * @param {import('discord.js').null[]} permissions The permissions you want to set for the slash command
-		 * @param {'set' | 'add'} editType The type of edit you want to do with this slash command. If you pick 'set', this will use `ApplicationCommandPermissionsManager#set()`, otherwise, if you pick 'add', this will use `ApplicationCommandPermissionsManager#add()`. Defaults to "add"
-		 * @deprecated Discord API v10 removed the usage of editing guild permissions through the bot.
-		 */
-		static editClientCommandPermissions(client: Client, commandName: string, permissions: null[], editType: 'set' | 'add'): Promise<void>
 		 
 		/**
 		 * Fetches an application command from the parentResolvable. If `parentResolvable` is a guild, the command will be fetched from the Guild, otherwise if `parentResolvable` is a client, the command will be fetched from the Client.

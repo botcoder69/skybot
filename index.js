@@ -6,10 +6,11 @@ const timeCodeStarted = Date.now();
 const CodeHandler = require('./Handlers');
 const fs = require('fs');
 const Util = require('./Util');
-const { Client, Collection, version: DiscordJSVersion, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ActivityType, PresenceUpdateStatus } = require('discord.js');
-const { CachedDatabase, Functions, SkyblockTypes, SkybotDatabase, SkybotDatabaseHandler, extendNativeClasses, version: SkyblockHelperVersion } = require('./SkyblockHelper/src/index');
+const { ActionRowBuilder, ActivityType, ButtonBuilder, ButtonStyle, Client, Collection, EmbedBuilder, Events, GatewayIntentBits, PresenceUpdateStatus, version: DiscordJSVersion } = require('discord.js');
+const { CachedDatabase, Functions, SkybotDatabase, SkybotDatabaseHandler, SkyblockTypes, extendNativeClasses, version: SkyblockHelperVersion } = require('./SkyblockHelper/src/index');
+const { RESTEvents } = require('@discordjs/rest');
 
-// const wait = require('util').promisify(setTimeout);
+const wait = require('util').promisify(setTimeout);
 const deployCommands = require('./deploy-commands');
 const { getUTCTime, msToHMSMs, makeid, calcTime, getRandomNumber, commafy, objToMap, mapToObj, parseTime } = Functions;
 
@@ -20,6 +21,7 @@ const chopUnlocks = new Map();
 const achievements = require('./achievements');
 const userCmdInfos = new Collection();
 const { updates, levelReq, betaToken } = require('./config.json');
+
 
 
 
@@ -102,23 +104,11 @@ class SkybotClient extends Client {
 	}
 }
 
-/*
-console.log = (...data) => {
-	console.warn(data);
-
-	try {
-		throw new Error();
-	} catch (error) {
-		console.error(error);
-	}
-};
-*/
-
 /* Initiate some classes from the libraries */
-const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzE2NTQ3MTYsImlhdCI6MTY3MTU0MzExNiwiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.ulyYjdhZ69zAx1BBDjtuyMksfdeivbXdvLDVCwAI7A1IUmLKCeF5I9carfIvlEanXtiCFsnbd-BPHkl0WODghg`);
-/*
+// const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzE2NTQ3MTYsImlhdCI6MTY3MTU0MzExNiwiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.ulyYjdhZ69zAx1BBDjtuyMksfdeivbXdvLDVCwAI7A1IUmLKCeF5I9carfIvlEanXtiCFsnbd-BPHkl0WODghg`);
+
 const db = new SkybotDatabaseHandler()
-	.setDebugMode(false)
+	.setDebugMode(true)
 	.setRequestRetries(Infinity)
 	.setKeyTreshold(2500)
 	.setDatabases(
@@ -210,7 +200,6 @@ extendNativeClasses(
 		extendObject: false
 	}
 );
-*/
 
 const client = new SkybotClient(
 	{ 
@@ -330,11 +319,11 @@ deployCommands('851616135592935425', `756000684733759611`, betaToken);
 
 // client.on('warn', console.log).on('debug', console.log);
 
-client.on('error', error => {
+client.on(Events.Error, error => {
 	console.error(`Emitted 'error' event on SkybotClient instance:`, error);
 });
 
-client.once('ready', async () => {
+client.once(Events.ClientReady, async () => {
 	client.user.setPresence({
 		activities: [
 			{ 
@@ -383,8 +372,8 @@ client.once('ready', async () => {
 	client.console.push(`${getUTCTime()} [Database][Logging] | Initializing Database...`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Initializing Database...`);
 
-	await db.fetchDatabaseEntries([`518736428721635338`]);
-	// await db.init();
+	// await db.fetchDatabaseEntries([`518736428721635338`]);
+	await db.init();
 
 	client.console.push(`${getUTCTime()} [Database][Logging] | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
@@ -422,13 +411,13 @@ client.once('ready', async () => {
 
 
 
-client.rest.on("rateLimited", () => {
+client.rest.on(RESTEvents.RateLimited, () => {
 	console.log(`${getUTCTime()} [Client]${chalk.yellowBright(`[Warning]`)} | Client is getting ratelimited!`);
 });
 
 
 
-client.on('interactionCreate', async interaction => {
+client.on(Events.InteractionCreate, async interaction => {
 	if (client.user.presence.status !== PresenceUpdateStatus.Online) return;
 
 	const maid = interaction.user.id;

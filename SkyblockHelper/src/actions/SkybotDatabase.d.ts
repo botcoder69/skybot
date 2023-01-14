@@ -9,6 +9,7 @@ declare class SkybotDatabase {
 	private friendlyName?: string;
 	private keyCount: number;
 	private keys: string[]
+	private kvMap: Map<string, any>
 	private readonly REPLIT_DB_URL: string;
 	private initDatabase(debug?: boolean, onFail: () => void): Promise<Map<string, any>>
 	private getPing(): Promise<number>

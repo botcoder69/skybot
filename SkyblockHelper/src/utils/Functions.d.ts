@@ -34,22 +34,6 @@ declare module Functions {
 	 */
 	function makeid(length: number, characters?: string): string
 	function msToHMSMs(ms: number): string
-	/**
-	 * Require a user to have a certain skill level to continue executing. If the user passes, returns `true`, otherwise, returns `false`
-	 * @param {Skill} skill
-	 * @param {number} level
-	 * @param {string} maid
-	 * @param {any} db
-	 */
-	function requireSkillLevel<Skill extends keyof SkillCollections>(skill: Skill, level: number, maid: string, db: any): Promise<boolean>
-	/**
-	 * Require a user to have a certain tool to continue executing. If the user passes, returns `true`, otherwise, returns `false`
-	 * @param {Tool} tool
-	 * @param {string} maid
-	 * @param {any} db
-	 * @deprecated Since v5.0.0 - Use the "toolMap" instead.
-	 */
-	function requireToolAndAbove<Tool extends keyof ToolRequirements>(tool: Tool, maid: string, db: any): Promise<boolean>
 	function secondsToHMS(seconds: number): string
 	/**
 	 * Splits an array into even chunks. Good for pages and your 2048 embed description character limit
@@ -62,12 +46,6 @@ declare module Functions {
 	 * @param {number} num 
 	 */
 	function toRomanNumeral(num: number): string
-	/**
-	 * Checks if the last element in an array is a number in a string.
-	 * @param {string[]} args 
-	 * @deprecated Since v4.0.0 - Use arrayValidNumber instead.
-	 */
-	function arrayLastNumber(args: string[]): boolean
 	/**
 	 * Checks if the last element in an array is a number in a string.
 	 * @param {string[]} args 

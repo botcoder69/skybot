@@ -17,6 +17,8 @@ class SkybotDatabase {
 
 		this.keyCount = 0;
 
+		this.kvMap = new Map();	
+
 		this.REPLIT_DB_URL = null;
 	}
 
