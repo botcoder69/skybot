@@ -1191,5 +1191,3 @@ module.exports = Functions;
  * @property {string} setting
  * @property {boolean} value
  */
-
-Functions.array
