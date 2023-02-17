@@ -1,38 +1,38 @@
 
+import Database from '@replit/database';
+import { 
+	Awaitable,
+	ApplicationCommand,
+	ButtonInteraction,
+	CacheType,
+	Client,
+	Collection,
+	ChatInputCommandInteraction,
+	EmojiIdentifierResolvable,
+	Guild,
+	GuildEmoji,
+	GuildMember,
+	If,
+	Interaction,
+	InventorySwordObj,
+	Message,
+	ActionRowBuilder,
+	ButtonBuilder,
+	EmbedBuilder,
+	MessageOptions,
+	MessagePayload,
+	MessageReaction,
+	Snowflake,
+	ThreadMember,
+	User
+} from 'discord.js';
+import EventEmitter from 'events';
+import { SlashCommandBuilder } from '@discordjs/builders'
+
 /**
  * A module exclusively for Skybot, containing various Classes and Functions to hasten coding and prevent Code Duplication.
  */
 declare module 'SkyblockHelper' {
-	import Database from '@replit/database';
-	import { 
-		AssetMapValues,
-		Awaitable,
-		ButtonInteraction,
-		CacheType,
-		Client,
-		Collection,
-		ChatInputCommandInteraction,
-		EmojiIdentifierResolvable,
-		Guild,
-		GuildEmoji,
-		GuildMember,
-		If,
-		Interaction,
-		Message,
-		ActionRowBuilder,
-		ButtonBuilder,
-		EmbedBuilder,
-		MessageOptions,
-		MessagePayload,
-		MessageReaction,
-		RawUserObj,
-		Snowflake,
-		ThreadMember,
-		User
-	} from 'discord.js';
-	import EventEmitter from 'events';
-	import { SlashCommandBuilder } from '@discordjs/builders'
-
 	export const Version: string;
 
 	/* CLASSES */
@@ -116,7 +116,7 @@ declare module 'SkyblockHelper' {
 	 * A Database that uses the map API without having to use the async and await operators.
 	 * @extends {Map}
 	 */
-	export class MapDatabase<K, V> extends Map<K, V> {
+	export class MapDatabase<K, V> {
 		constructor()
 		/**
 	     * Identical to [Map.get()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/get).
@@ -298,7 +298,7 @@ declare module 'SkyblockHelper' {
 		 * @param {boolean} [remove=false] Remove keys on object creation
 		 * @param {string[]} [exclude=[]] Keys to be excluded from deletion when deleting keys
 		 */
-		static keysToObj(db: Database<any>, maid: string, remove?: boolean, exclude?: string[]): Promise<RawUserObj>
+		static keysToObj(db: Database<any>, maid: string, remove?: boolean, exclude?: string[]): Promise<any>
 	
 		/**
 		 * Parses seconds to a days, hours, minutes, seconds format. Stripped from Dank Memer
@@ -362,10 +362,10 @@ declare module 'SkyblockHelper' {
 	
 		/**
 		 * Checks if the user has a specific "Active Item". Added to `Functions` to prevent "Code Duplication"
-		 * @param {RawUserObj} maidObj 
+		 * @param {any} maidObj 
 		 * @param {string} item 
 		 */
-		static checkActiveItem(maidObj: RawUserObj, item: string): boolean
+		static checkActiveItem(maidObj: any, item: string): boolean
 	
 		/**
 		 * Check if the `Four_Leaf_Clover` item helped the user
@@ -382,7 +382,7 @@ declare module 'SkyblockHelper' {
 		 * @param {Collection<string, SkybotCurrencyProfile>} leaderboard 
 		 * @param {Client} client 
 		 */
-		static initLeaderboard(db: Database<RawUserObj>, leaderboard: Collection<string, SkybotCurrencyProfile>, client: Client, excludedKeys?: string[]): Promise<void>
+		static initLeaderboard(db: Database<any>, leaderboard: Collection<string, SkybotCurrencyProfile>, client: Client, excludedKeys?: string[]): Promise<void>
 	
 		/**
 		 * This handy static overwrites existing properties. If the property in `objectToOverwrite` doesn't exist in `objectFromOverwrite`, it will be kept, otherwise, it will be overwritten
@@ -461,7 +461,7 @@ declare module 'SkyblockHelper' {
 		 */
 		static aoran(word: string): 'a' | 'an';
 	
-		static getSettingValue(maidObj: RawUserObj, setting: ValidSettingStrings): boolean;
+		static getSettingValue(maidObj: any, setting: ValidSettingStrings): boolean;
 		 
 		/**
 		 * Fetches an application command from the parentResolvable. If `parentResolvable` is a guild, the command will be fetched from the Guild, otherwise if `parentResolvable` is a client, the command will be fetched from the Client.
@@ -843,11 +843,11 @@ declare module 'SkyblockHelper' {
 		private validateOutcomes(): void;
 		private normalizeOutcomes(): void;
 		private createAdventureProgressBar(interactions: number, middle: string): string;
-		private performAdventureItemLoss(maidObj: RawUserObj, sent: Message, outcome: AdventureOutcome<'ITEM_LOSS'>): Promise<void>;
-		private performAdventureDeath(maidObj: RawUserObj, sent: Message, outcome: AdventureOutcome<'DEATH'>): Promise<void>;
-		private performAdventureFatalDeath(maidObj: RawUserObj, sent: Message, outcome: AdventureOutcome<'FATAL_DEATH'>): Promise<void>;
-		private performAdventureReward(maidObj: RawUserObj, sent: Message, outcome: AdventureOutcome<'REWARD'>): Promise<void>;
-		private performAdventureNothing(maidObj: RawUserObj, sent: Message, outcome: AdventureOutcome<'NOTHING'>): Promise<void>;
+		private performAdventureItemLoss(maidObj: any, sent: Message, outcome: AdventureOutcome<'ITEM_LOSS'>): Promise<void>;
+		private performAdventureDeath(maidObj: any, sent: Message, outcome: AdventureOutcome<'DEATH'>): Promise<void>;
+		private performAdventureFatalDeath(maidObj: any, sent: Message, outcome: AdventureOutcome<'FATAL_DEATH'>): Promise<void>;
+		private performAdventureReward(maidObj: any, sent: Message, outcome: AdventureOutcome<'REWARD'>): Promise<void>;
+		private performAdventureNothing(maidObj: any, sent: Message, outcome: AdventureOutcome<'NOTHING'>): Promise<void>;
 		private addAdventureLuck(items: BaseItemData);
 	
 	
@@ -919,7 +919,6 @@ declare module 'SkyblockHelper' {
 	class BaseItem {
 		public constructor(data: BaseItemData);
 	
-		public search: string[];
 		public group: string;
 		public name: string;
 		public keyName: string;
@@ -933,6 +932,8 @@ declare module 'SkyblockHelper' {
 		public levelReq?: LevelRequirement;
 		public enchanted?: BaseItem;
 		public fuel?: FuelData;
+		public bazaar?: BazaarData;
+		public soulbound?: boolean;
 		public includeInParsing: false;
 		
 		public displayEmojiName(minionEmojiType?: 'placed' | 'inventory'): string;
@@ -945,7 +946,7 @@ declare module 'SkyblockHelper' {
 		/** @deprecated Use `EquippableItemData#onEquip()` instead */
 		public equipData: EquippableItemEquipData;
 		public emoji: ItemEmojiData;
-		public onEquip(interaction: ChatInputCommandInteraction, maidObj: RawUserObj): RawUserObj;
+		public onEquip(interaction: ChatInputCommandInteraction, maidObj: any): any;
 	}
 
 	export class Armor extends EquipableItem {
@@ -1033,8 +1034,10 @@ declare module 'SkyblockHelper' {
 		public constructor();
 
 		public readonly cooldown?: DragonTypeReducer<Type, null, null, number>
-		public readonly dragonDamage?: DragonTypeReducer<Type, null, Collection<string, DragonFightUser>>;
+		public readonly publicDragonDamage?: DragonTypeReducer<Type, null, Collection<string, DragonFightUser>>;
 		public readonly dragonHealth?: DragonTypeReducer<Type, null, number>;
+		public readonly dragonDamage?: DragonTypeReducer<Type, null, number>;
+		public readonly dragonDefense?: DragonTypeReducer<Type, null, number>;
 		public readonly dragonVariant?: DragonTypeReducer<Type, null, DragonVariants>;
 		public readonly eyes?: DragonTypeReducer<Type, Collection<string, number>>;
 		public readonly type: Type;
@@ -1143,6 +1146,9 @@ declare module 'SkyblockHelper' {
 	interface DragonAttackObj {
 		user: GuildMember;
 		damage: number;
+		dmgResist: number;
+		trueDamage: number;
+		originalDamage: number;
 	}
 	
 
@@ -1177,19 +1183,6 @@ declare module 'SkyblockHelper' {
 		RelativeTime: 'R',
 	}
 
-	interface ToolRequirements {
-		wooden_pickaxe: string
-		stone_pickaxe: string
-		iron_pickaxe: string
-		gold_pickaxe: string
-		diamond_pickaxe: string
-		wooden_axe: string
-		stone_axe: string
-		iron_axe: string
-		gold_axe: string
-		diamond_axe: string
-	}
-
 	interface VersionReturnsTypes {
 		v12: string | EmbedBuilder | MessageOptions
 		v13: string | MessagePayload | MessageOptions
@@ -1206,7 +1199,6 @@ declare module 'SkyblockHelper' {
 	}
 
 	interface BaseItemData {
-		search: string[];
 		group: string;
 		name: string;
 		keyName: string;
@@ -1214,12 +1206,58 @@ declare module 'SkyblockHelper' {
 		rarity: keyof ItemRarities;
 		emoji: any;
 		NPC: NPCData;
-		sellall: SellallData
+		sellall: SellallData;
+		smeltable: SmeltData;
 		crafting?: CraftingData;
 		levelReq?: LevelRequirement;
 		enchanted?: BaseItem;
 		fuel?: FuelData;
+		bazaar?: BazaarData;
+		soulbound?: boolean;
 		includeInParsing: false;
+	}
+
+	interface BazaarData {
+		/** The category this item's subcategory will belong in. */
+		category: BazaarCategoryData;
+		/** The subcategory this item will belong in. */
+		subcategory: BazaarSubcategoryData;
+		/** Individual precedences for this item, its category and subcategory. */
+		precedence: BazaarPrecedenceData;
+		/** To be filled up by SkybotBazaarAPI */
+		marketTrends: BazaarMarketTrendData;
+	}
+	
+	interface BazaarCategoryData {
+		/** The name of this category. */
+		name: string;
+		/** The emoji for this category. It's value must be constant throughout all the items with this category, since the emoji of this category will be based off that */
+		emoji: EmojiIdentifierResolvable | null;
+	}
+	
+	interface BazaarSubcategoryData {
+		/** The name of this subcategory. */
+		name: string;
+		/** The emoji for this subcategory. It's value must be constant throughout all the items with this subcategory, since the emoji of this subcategory will be based off that */
+		emoji: EmojiIdentifierResolvable | null;
+	}
+
+	interface BazaarPrecedenceData {
+		/** This is the precedence of the category this item is in. It's value must be constant throughout all the items with this category, since the order of this category inside the Bazaar menu will be based off that. */
+		categoryPrecedence: number;
+		/** This is the precedence of the subcategory this item is in. It's value must be constant throughout all the items with this subcategory, since the order of the subcategory inside the category will be based off that. */
+		subcategoryPrecedence: number;
+		/** This is the precedence of the subcategory place this item is in. It's value must be different throughout all the items with this subcategory, since the order of the items inside the subcategory will be based of that. */
+		itemPrecedence: number;
+		/** Contains current market trend of the item. To be filled up by SkybotBazaarAPI */
+		marketTrends: BazaarMarketTrendData;
+	}
+
+	interface BazaarMarketTrendData {
+		/** Lowest value to buy this item from the Bazaar */
+		buy: number?;
+		/** Highest value to sell this item to the Bazaar */
+		sell: number?;
 	}
 	
 	interface FuelData {
@@ -1259,7 +1297,7 @@ declare module 'SkyblockHelper' {
 		/**
 		 * This function must contain everything in order for the item to be used. Things like deducting and adding items is handled by the `equip` command.   
 		 */
-		onEquip(interaction: ChatInputCommandInteraction, maidObj: RawUserObj): RawUserObj;
+		onEquip(interaction: ChatInputCommandInteraction, maidObj: any): any;
 	}
 
 	interface PowerUpData extends EquippableItemData {
@@ -1693,19 +1731,6 @@ declare module 'SkyblockHelper' {
 		empty?: string;
 	}
 	
-	interface ToolRequirements {
-		wooden_pickaxe: string;
-		stone_pickaxe: string;
-		iron_pickaxe: string;
-		gold_pickaxe: string;
-		diamond_pickaxe: string;
-		wooden_axe: string;
-		stone_axe: string;
-		iron_axe: string;
-		gold_axe: string;
-		diamond_axe: string;
-	}
-	
 	interface SkillCollections {
 		foraging: string;
 		mining: string;
@@ -1728,115 +1753,6 @@ declare module 'SkyblockHelper' {
 		prepend?: string;
 		append?: string;
 	  }
-	
-	type RawUserObj = {
-		axe?: string;
-		pickaxe?: string;
-		rod?: string;
-		cobblestone?: number;
-		coal?: number;
-		ironOre?: number;
-		iron?: number;
-		goldOre?: number;
-		gold?: number;
-		lapis?: number;
-		diamond?: number;
-		pureDiamond?: number;
-		startMine?: boolean;
-		ironMine?: boolean;
-		goldMine?: boolean;
-		lapisQua?: boolean;
-		diaSanct?: boolean;
-		redsMine?: boolean;
-		mineLevel?: number;
-		mineXp?: number;
-		fishLevel?: number;
-		fishXp?: number;
-		chopLevel?: number;
-		chopXp?: number;
-		oakWood?: number;
-		birchWood?: number;
-		darkOakWood?: number;
-		spruceWood?: number;
-		acaciaWood?: number;
-		jungleWood?: number;
-		planks?: number;
-		stick?: number;
-		forest?: boolean;
-		roofedForest?: boolean;
-		taiga?: boolean;
-		savannah?: boolean;
-		jungle?: boolean;
-		commonFish?: number;
-		uncommonFish?: number;
-		rareFish?: number;
-		ultraRareFish?: number;
-		legendaryFish?: number;
-		coins?: number;
-		bank?: number;
-		netWorth?: number;
-		invOakWoodMinion?: number;
-		invBirchWoodMinion?: number;
-		invDarkOakWoodMinion?: number;
-		invSpruceWoodMinion?: number;
-		invAcaciaWoodMinion?: number;
-		invJungleWoodMinion?: number;
-		invCobblestoneMinion?: number;
-		invCoalMinion?: number;
-		invIronMinion?: number;
-		invGoldMinion?: number;
-		invDiamondMinion?: number;
-		invLapisMinion?: number;
-		placedMinions?: (string | number)[][];
-		bankTier?: number;
-		enchantedGold?: number;
-		enchantedGoldBlock?: number;
-		blockOfCoal?: number;
-		enchantedBread?: number;
-		enchantedCharcoal?: number;
-		enchantedCoal?: number;
-		enchantedLavaBucket?: number;
-		enchantedCobblestone?: number;
-		enchantedIron?: number;
-		enchantedLapis?: number;
-		enchantedDiamond?: number;
-		enchantedOakWood?: number;
-		enchantedBirchWood?: number;
-		enchantedDarkOakWood?: number;
-		enchantedSpruceWood?: number;
-		enchantedAcaciaWood?: number;
-		enchantedJungleWood?: number;
-		redstone?: number;
-		enchantedRedstone?: number;
-		compactor?: number;
-		superCompactor?: number;
-		invRedstoneMinion?: number;
-		tutorials?: TutorialObj;
-		gambleStats?: GambleStatsObj;
-		sword?: SwordObj;
-		woodenSword?: number;
-		stoneSword?: number;
-		ironSword?: number;
-		goldSword?: number;
-		diamondSword?: number;
-		aspectOfTheSpiritButterfly?: number;
-		spiritButterfly?: number;
-		woodenPickaxe?: number;
-		stonePickaxe?: number;
-		ironPickaxe?: number;
-		goldPickaxe?: number;
-		diamondPickaxe?: number;
-		woodenAxe?: number;
-		stoneAxe?: number;
-		ironAxe?: number;
-		goldAxe?: number;
-		diamondAxe?: number;
-		combatLevel?: number;
-		combatXp?: number;
-		start?: boolean;
-		update?: string;
-		activeItems?: ActiveItemObj[];
-	};
 	
 	interface FilledArmorStatisticData {
 		health: number;
@@ -1884,21 +1800,10 @@ declare module 'SkyblockHelper' {
 		emoji: string;
 		endTimestamp: number;
 	};
+
+	// type UserResolvable = string | Snowflake | Message | Interaction | User | GuildMember | ThreadMember;
 	
-	type SkybotTimeOptions = {
-		newLine?: boolean;
-	}
-	
-	type UserResolvable = string | Snowflake | Message | Interaction | User | GuildMember | ThreadMember;
-	
-	type GuildMemberResolvable = string | Snowflake | Message<true> | Interaction<'cached'> | GuildMember | ThreadMember
-	
-	type SkybotCurrencyProfile = {
-		money: number;
-		netWorth: number;
-		username: string;
-		id: string;
-	}
+	// type GuildMemberResolvable = string | Snowflake | Message<true> | Interaction<'cached'> | GuildMember | ThreadMember
 	
 	type FlagReturn<ArrayType extends unknown> = {
 		exists: boolean

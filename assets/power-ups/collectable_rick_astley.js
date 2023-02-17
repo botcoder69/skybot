@@ -1,7 +1,7 @@
 
 const { PowerUp } = require('../../SkyblockHelper/src/index.js');
-const { ModalBuilder, DiscordjsError } = require('discord.js');
-const { joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, createAudioResource, AudioPlayerStatus, StreamType, VoiceConnection, VoiceConnectionStatus } = require('@discordjs/voice');
+// const { ModalBuilder, DiscordjsError } = require('discord.js');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, StreamType } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
 
 module.exports = new PowerUp(
@@ -26,8 +26,7 @@ module.exports = new PowerUp(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
 		},
 		async onEquip(interaction, maidObj) {
 			const user = interaction.options.getUser('target');

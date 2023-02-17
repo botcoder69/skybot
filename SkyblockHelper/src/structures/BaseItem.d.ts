@@ -1,11 +1,12 @@
 
+import { EmojiIdentifierResolvable } from "discord.js";
+
 /**
  * The basic class for making a Skybot Item.
  */
 export declare class BaseItem {
 	public constructor(data: BaseItemData);
 
-	public search: string[];
 	public group: string;
 	public name: string;
 	public keyName: string;
@@ -19,83 +20,127 @@ export declare class BaseItem {
 	public levelReq?: LevelRequirement;
 	public enchanted?: BaseItem;
 	public fuel?: FuelData;
-	public includeInParsing: false;
+	public bazaar?: BazaarData;
+	public soulbound?: boolean;
+	public includeInParsing: boolean;
 	
 	public displayEmojiName(minionEmojiType?: 'placed' | 'inventory'): string;
 	public displayEmojiURL(minionEmojiType?: 'placed' | 'inventory'): string;
 }
 
 export declare interface BaseItemData {
-	search: string[];
-	group: string;
-	name: string;
-	keyName: string;
-	description?: string;
-	rarity: keyof ItemRarities;
-	emoji: any;
-	NPC: NPCData;
-	sellall: SellallData
-	crafting?: CraftingData;
-	levelReq?: LevelRequirement;
-	enchanted?: BaseItem;
-	fuel?: FuelData;
-	includeInParsing: boolean;
+	public group: string;
+	public name: string;
+	public keyName: string;
+	public description?: string;
+	public rarity: keyof ItemRarities;
+	public emoji: any;
+	public NPC: NPCData;
+	public sellall: SellallData
+	public crafting?: CraftingData;
+	public levelReq?: LevelRequirement;
+	public enchanted?: BaseItem;
+	public fuel?: FuelData;
+	public bazaar?: BazaarData;
+	public soulbound?: boolean;
+	public includeInParsing: boolean;
 }
 
 interface ItemRarities {
-	Common: string;
-	Uncommon: string;
-	Rare: string;
-	Epic: string;
-	Legendary: string;
-	Mythic: string;
-	Divine: string;
-	Special: string;
-	'Very Special': string;
+	public Common: string;
+	public Uncommon: string;
+	public Rare: string;
+	public Epic: string;
+	public Legendary: string;
+	public Mythic: string;
+	public Divine: string;
+	public Special: string;
+	public 'Very Special': string;
 }
 
 interface FuelData {
-	time: number;
+	public time: number;
 }
 
-type SellNPCData = {
-	sellable: boolean; 
-	price: number;
+interface SellNPCData {
+	public sellable: boolean; 
+	public price: number;
 }
 
-type BuyNPCData = {
-	buyable: boolean; 
-	price: number;
+interface BuyNPCData {
+	public buyable: boolean; 
+	public price: number;
 }
 
-type NPCData = {
-	sell: SellNPCData;
-	buy: BuyNPCData;
+interface NPCData {
+	public sell: SellNPCData;
+	public buy: BuyNPCData;
 }
 
-type CraftingData = {
-	type: `oneItem`,
-	materials?: [string, string, string, number][],
-	outputs?: number;
-	repair?: RepairData;
+interface CraftingData {
+	public type: `oneItem`,
+	public materials?: [string, string, string, number][],
+	public outputs?: number;
+	public repair?: RepairData;
 }
 
-type SellallData = {
-	included: boolean; 
-	filterGroup?: string;
+interface SellallData {
+	public included: boolean; 
+	public filterGroup?: string;
 }
 
-type SmeltData = {
-	output: BaseItem;
-	amount: number;
+interface SmeltData {
+	public output: BaseItem;
+	public amount: number;
 }
 
-type LevelRequirement = {
-	skill: `Foraging` | `Mining` | `Fishing` | `Combat`;
-	level: number;
+interface LevelRequirement {
+	public skill: `Foraging` | `Mining` | `Fishing` | `Combat`;
+	public level: number;
 }
 
-type RepairData = {
-	materials: [string, string, string, number][];
-	outputs: [string, string, string, number];
+interface RepairData {
+	public materials: [string, string, string, number][];
+	public outputs: [string, string, string, number];
+}
+
+interface BazaarData {
+	/** The category this item's subcategory will belong in. */
+	public category: BazaarCategoryData;
+	/** The subcategory this item will belong in. */
+	public subcategory: BazaarSubcategoryData;
+	/** Individual precedences for this item, its category and subcategory. */
+	public precedence: BazaarPrecedenceData;
+	/** To be filled up by SkybotBazaarAPI */
+	public marketTrends: BazaarMarketTrendData?;
+}
+
+interface BazaarCategoryData {
+	/** The name of this category. */
+	public name: string;
+	/** The emoji for this category. It's value must be constant throughout all the items with this category, since the emoji of this category will be based off that */
+	public emoji: EmojiIdentifierResolvable | null;
+}
+
+interface BazaarSubcategoryData {
+	/** The name of this subcategory. */
+	public name: string;
+	/** The emoji for this subcategory. It's value must be constant throughout all the items with this subcategory, since the emoji of this subcategory will be based off that */
+	public emoji: EmojiIdentifierResolvable | null;
+}
+
+interface BazaarPrecedenceData {
+	/** This is the precedence of the category this item is in. It's value must be constant throughout all the items with this category, since the order of this category inside the Bazaar menu will be based off that. */
+	public categoryPrecedence: number;
+	/** This is the precedence of the subcategory this item is in. It's value must be constant throughout all the items with this subcategory, since the order of the subcategory inside the category will be based off that. */
+	public subcategoryPrecedence: number;
+	/** This is the precedence of the subcategory place this item is in. It's value must be different throughout all the items with this subcategory, since the order of the items inside the subcategory will be based of that. */
+	public itemPrecedence: number;
+}
+
+interface BazaarMarketTrendData {
+	/** Lowest value to buy this item from the Bazaar */
+	public buy: number;
+	/** Highest value to sell this item to the Bazaar */
+	public sell: number;
 }

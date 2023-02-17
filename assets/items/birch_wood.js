@@ -3,10 +3,9 @@ const { Item } = require('../../SkyblockHelper/src/index.js');
 
 module.exports = new Item(
 	{
-		group: `Item`,
 		name: `Birch Wood`,
 		keyName: `birchWood`,
-		description: `A piece of birch wood found from the Floating Islands. Used to make planks.`,
+		description: `A piece of Birch Wood, found from chopping fully grown Birch Trees in the Floating Islands. Can be used to make planks.`,
 		rarity: `Common`,
 		emoji: {
 			name: `<:Birch_Log:885390554400165938>`,
@@ -24,7 +23,22 @@ module.exports = new Item(
 		},
 		sellall: {
 			included: true,
-			filterGroup: "woodworking"
+			filterGroup: `woodworking`
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Birch`,
+				emoji: `<:Birch_Log:885390554400165938>`
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 3,
+				itemPrecedence: 1
+			}
 		},
 		includeInParsing: true
 	}

@@ -23,8 +23,20 @@ module.exports = new Item(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
+		},
+		bazaar: {
+			category: {
+				name: `Combat`,
+			},
+			subcategory: { 
+				name: `Dragon Fragments` 
+			},
+			precedence: {
+				categoryPrecedence: 5,
+				subcategoryPrecedence: 5,
+				itemPrecedence: 3
+			}
 		},
 		includeInParsing: true
 	}

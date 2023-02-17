@@ -12,8 +12,9 @@ declare class DragonFight<Type = `DORMANT`> extends EventEmitter {
 
 	public readonly cooldown?: DragonTypeReducer<Type, null, null, number>;
 	public readonly dragonWeight: Collection<string, number>;
-	public readonly dragonDamage?: DragonTypeReducer<Type, null, Collection<string, DragonFightUser>>;
+	public readonly playerDragonDamage?: DragonTypeReducer<Type, null, Collection<string, DragonFightUser>>;
 	public readonly dragonHealth?: DragonTypeReducer<Type, null, number>;
+	public readonly dragonDefense?: DragonTypeReducer<Type, null, number>
 	public readonly dragonVariant?: DragonTypeReducer<Type, null, DragonVariants>;
 	public readonly eyes?: DragonTypeReducer<Type, Collection<string, number>>;
 	public readonly type: Type;
@@ -82,8 +83,9 @@ interface DragonFightEvents {
 interface DragonAttackObj {
 	user: GuildMember;
 	damage: number;
-	blocked: number;
-	original: number
+	dmgResist: number;
+	trueDamage: number;
+	originalDamage: number;
 }
 
 export = DragonFight;

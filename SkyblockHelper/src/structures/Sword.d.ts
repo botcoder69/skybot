@@ -1,7 +1,7 @@
 
+import Mob from '../Fight/Mob';
 import { EquipableItem, EquippableItemData } from './EquipableItem';
-import { BaseItemData } from './BaseItem';
-import { Message, InventorySwordObj, ChatInputCommandInteraction } from 'discord.js';
+import { InventorySwordObj, ChatInputCommandInteraction } from 'discord.js';
 
 declare class Sword extends EquipableItem {
 	constructor(data: SwordData);
@@ -34,7 +34,7 @@ type SwordFunctions = {
 	 * @param {InventorySwordObj} sword The sword object
 	 * @param {number} index The index. This is how many times the user and mob traded hits.
 	 */
-	onHit(mob: import ('../../../test_SkybotStatusEffects/classes/Mob'), sword: InventorySwordObj, index: number, fightActions: string[], playerHealth: number, maxHealth: number): number
+	onHit(mob: Mob, sword: InventorySwordObj, index: number, fightActions: string[], playerHealth: number, maxHealth: number): number
 	/**
 	 * A function that does something with the sword when it kills a mob.
 	 * @param {ChatInputCommandInteraction} interaction The ChatInputCommandInteraction object.

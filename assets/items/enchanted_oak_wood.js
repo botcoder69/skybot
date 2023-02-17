@@ -3,14 +3,13 @@ const { Item } = require('../../SkyblockHelper/src/index.js');
 
 module.exports = new Item(
 	{
-		group: "Item",
 		name: `Enchanted Oak Wood`,
-		keyName: "enchantedOakWood",
-		description: "",
-		rarity: "Uncommon",
+		keyName: `enchantedOakWood`,
+		description: `A rare piece of Oak Wood. Due to it's resillent endurance against some natural factors, it's usually used in making sturdier wooden huts and houses.`,
+		rarity: `Uncommon`,
 		emoji: {
 			name: `<:Enchanted_Oak_Wood:900308904913817600>`,
-			url: "https://cdn.discordapp.com/emojis/900308904913817600.png",
+			url: `https://cdn.discordapp.com/emojis/900308904913817600.png`,
 		},
 		NPC: {
 			sell: {
@@ -23,8 +22,22 @@ module.exports = new Item(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Oak`,
+				emoji: `<:Oak_Log:885390554005897237>`
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 1,
+				itemPrecedence: 2
+			}
 		},
 		crafting: {
 			type: `oneItem`,

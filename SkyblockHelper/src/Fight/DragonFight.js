@@ -17,11 +17,15 @@ class DragonFight extends EventEmitter {
 		/**
 		 * @type {Collection<string, DragonFightUser>}
 		 */
-		this.dragonDamage = new Collection();
+		this.playerDragonDamage = new Collection();
 
 		this.dragonWeight = new Collection();
 
 		this.dragonHealth = null;
+
+		this.dragonDamage = null;
+
+		this.dragonDefense = null;
 
 		this.dragonVariant = null;
 
@@ -30,6 +34,24 @@ class DragonFight extends EventEmitter {
 		this.type = `DORMANT`;
 
 		this.guild = guild;
+	}
+
+	/**
+	 * @private
+	 */
+	// eslint-disable-next-line class-methods-use-this
+	calculateDragonDMG(damage, health) {
+		if (damage < health*(0.4/100)) {
+			return damage;
+		} else if (damage < health*(0.6/100)) {
+			return damage * 0.5;
+		} else if (damage < health*(0.8/100)) {
+			return damage * 0.25;
+		} else if (damage < health*(1/100)) {
+			return damage * 0.1;
+		} else {
+			return damage * 0.001;
+		}
 	}
 
 	/**
@@ -48,25 +70,38 @@ class DragonFight extends EventEmitter {
 
 			// Most dragons have a health point of 9,000,000. This is just to avoid repeating 9,000,000 over the code.
 			this.dragonHealth = 9_000_000;
+			this.dragonDefense = 25;
+			this.dragonDamage = 1_100;
 			this.type = `ONGOING`;
 
 			if (dragonRNG <= 16) {
 				this.dragonVariant = `PROTECTOR`;
+
+				this.dragonDefense = 85;
 			} else if (dragonRNG <= 32) {
-				this.dragonHealth = 15_000_000;
 				this.dragonVariant = `OLD`;
+
+				this.dragonHealth = 15_000_000;
+				this.dragonDefense = 18;
 			} else if (dragonRNG <= 48) {
 				this.dragonVariant = `WISE`;
+
+				this.dragonDamage = 2_200;
 			} else if (dragonRNG <= 64) {
 				this.dragonVariant = `UNSTABLE`;
 			} else if (dragonRNG <= 80) {
-				this.dragonHealth = 7_500_000;
 				this.dragonVariant = `YOUNG`;
+
+				this.dragonHealth = 7_500_000;
+				this.dragonDefense = 18;
 			} else if (dragonRNG <= 96) {
 				this.dragonVariant = `STRONG`;
 			} else {
-				this.dragonHealth = 12_000_000;
 				this.dragonVariant = `SUPERIOR`;
+
+				this.dragonHealth = 12_000_000;
+				this.dragonDamage = 1_650;
+				this.dragonDefense = 30;
 			}
 
 			this.emit('dragonSummon', this.dragonVariant);
@@ -95,29 +130,25 @@ class DragonFight extends EventEmitter {
 	 * @param {number} eh Stands for `Effective Health`.
 	 */
 	addDragonDamage(user, damage, health, defense) {
-		const userObj = this.dragonDamage.get(user) ?? { health: { current: health, initial: health }, defense: defense, damage: 0, dead: false };
+		const userObj = this.playerDragonDamage.get(user) ?? { health: { current: health, initial: health }, defense: defense, damage: 0, dead: false };
 
-		/**
-		 * This allows for damage to "cap" at 500,000 damage. People with a maxed 
-		 * `Aspect of the Spirit Butterfly` can deal up to 30 MILLION RAW DAMAGE, 
-		 * which can guarantee a one tap of every single dragon. Since this
-		 * advantage is *unfair*, I capped damage to the Dragon at 500,000.  
-		 */
-		damage = damage > 500_000
-			? 500_000
-			: damage;
+		const dragonMaxHP = this.dragonVariant === `YOUNG`
+			? 7_500_000
+			: this.dragonVariant === `SUPERIOR`
+				? 12_000_000
+				: this.dragonVariant === `OLD`
+					? 15_000_000
+					: 9_000_000;
 
-		// Some other things:
-		if (this.dragonVariant === `PROTECTOR`) {
-			damage *= 0.80;
-		} else if (this.dragonVariant === `SUPERIOR`) {
-			damage *= 0.90;
-		}
+		// Scales DMG according to Dragon's Max Health.
+		damage = this.calculateDragonDMG(damage, dragonMaxHP);
+		// Adds Dragon Defense to the DMG Calculation. 
+		damage = Math.floor(damage * (1 - SkyblockMechanicUtil.getDamageReduction(this.dragonDefense)));
 		
 		userObj.damage += damage;
 		this.dragonHealth -= damage;
 
-		this.dragonDamage.set(user, userObj);
+		this.playerDragonDamage.set(user, userObj);
 
 
 
@@ -126,11 +157,11 @@ class DragonFight extends EventEmitter {
 
 			this.cooldown = Date.now() + 600_000;
 
-			this.emit('dragonDeath', this.dragonVariant, this.dragonDamage, this.guild.members.cache.get(user));
+			this.emit('dragonDeath', this.dragonVariant, this.playerDragonDamage, this.guild.members.cache.get(user));
 		} else {
 			// This allows for a 40% no attack. Can be nerfed or buffed if the Dragon is TOO op or TOO ez.
-			const attackRNG = Functions.getRandomNumber(1, 100);
-			const players = this.dragonDamage
+			const attackRNG = Functions.getRandomNumber(1, 120);
+			const players = this.playerDragonDamage
 				.filter(dragonFightObj => !dragonFightObj.dead)
 				.map((_value, key) => key);
 
@@ -146,66 +177,88 @@ class DragonFight extends EventEmitter {
 					: 20;
 
 			let atkType;
+			console.log(`Math.floor(${SkyblockMechanicUtil.getDamageReduction(defense)} * 100) / 100 => ${Math.floor(SkyblockMechanicUtil.getDamageReduction(defense) * 100) / 100}`);
 			if (attackRNG <= 20) {
 				// This means the Rush Attack.
 				const [targetUser] = Functions.randomizeArray(players, 1);
-				const userObj = this.dragonDamage.get(targetUser);
-				const dmgResist = Math.floor(SkyblockMechanicUtil.getDamageReduction(userObj.defense) * 100);
+				// Get userObject.
+				const userObj = this.playerDragonDamage.get(targetUser);
+				// This is the DMG% the user will ignore.
+				const dmgResist = (Math.floor(SkyblockMechanicUtil.getDamageReduction(defense) * 100) / 100);
+
+
 				
-				// eslint-disable-next-line no-nested-ternary
-				const rushDamage = this.dragonVariant === `STRONG`
-					// This is the rushDamage for a `STRONG` type Dragon.
-					? Functions.getRandomNumber((health * 0.5), (health * 0.8))
-					: this.dragonVariant === `SUPERIOR`
-						// This is the rushDamage for a `SUPERIOR` type Dragon.
-						? Functions.getRandomNumber((health * 0.4), (health * 0.7))
-						// This is the rushDamage for the other Dragons.
-						: Functions.getRandomNumber((health * 0.3), (health * 0.6));
+				/* Multiplier Calculation */
+				let rushDMGMulti = 1;
 
-				const finalRushDmg = rushDamage - Math.floor(rushDamage * (dmgResist / 100));
+				// +50% if HP < 50% Max HP
+				if ((this.dragonHealth / dragonMaxHP) < 0.5) rushDMGMulti += 0.5;
+				// +20% Rush and Contact DMG; +20% Passive: Strong Spells;
+				if (this.dragonVariant === `STRONG`) rushDMGMulti += 0.4;	
+				// +15% Rush and Contact DMG; +12.5% Passive: Superiority (62.5% of other Dragon's abilities; Passive: Strong Spells);
+				if (this.dragonVariant === `SUPERIOR`) rushDMGMulti += 0.275;
 
-				userObj.health.current -= finalRushDmg;
+		
+
+				/* Rush DMG Calculation */
+				const rushDMG = Math.floor((2_000 * rushDMGMulti) * (1 - dmgResist));
+				// Deal 55% of the players Health in True DMG
+				const rushTrueDMG = Math.floor(userObj.health.current * 0.55);
+
+				userObj.health.current -= Math.floor(rushDMG + rushTrueDMG);
+
+
 
 				const res = [
 					{
 						user: this.guild.members.cache.get(targetUser),
-						damage: finalRushDmg,
-						original: rushDamage,
-						blocked: dmgResist
+						damage: rushDMG,
+						dmgResist: dmgResist,
+						trueDamage: rushTrueDMG, 
+						originalDamage: Math.floor(2_000 * rushDMGMulti)
 					}
 				];
 
 				this.emit(`dragonAttack`, `RUSH`, res);
 				atkType = `RUSH`;
 			} else if (attackRNG <= (fireballRNG + 20)) {
-				// This means the Fireball Attack. This will target only ~50% of the players in the nest.
-				const targetUsers = Functions.randomizeArray(players, Math.ceil(players.length * 0.5));
+				// This means the Fireball Attack. This will target only ~35% of the players in the nest.
+				const targetUsers = Functions.randomizeArray(players, Math.ceil(players.length * 0.25));
 				const res = [];
 
 				for (const targetUser of targetUsers) {
-					const userObj = this.dragonDamage.get(targetUser);
-					const dmgResist = Math.floor(SkyblockMechanicUtil.getDamageReduction(userObj.defense) * 100);
+					const userObj = this.playerDragonDamage.get(targetUser);
+					// This is the DMG% the user will ignore.
+					const dmgResist = (Math.floor(SkyblockMechanicUtil.getDamageReduction(defense) * 100) / 100);
 
-					// eslint-disable-next-line no-nested-ternary
-					const fireballDamage = this.dragonVariant === `STRONG`
-					// This is the fireballDamage for a `STRONG` type Dragon.
-						? Functions.getRandomNumber((health * 0.4), (health * 0.7))
-						: this.dragonVariant === `SUPERIOR`
-						// This is the fireballDamage for a `SUPERIOR` type Dragon.
-							? Functions.getRandomNumber((health * 0.3), (health * 0.6))
-						// This is the fireballDamage for the other Dragons.
-							: Functions.getRandomNumber((health * 0.2), (health * 0.5));
 
-					const finalFireballDmg = fireballDamage - Math.floor(fireballDamage * (dmgResist / 100));
 
-					userObj.health.current -= finalFireballDmg;
+					/* Multiplier Calculation */
+					let fireballDMGMulti = 1;
+
+					// +50% if HP < 50% Max HP
+					if ((this.dragonHealth / dragonMaxHP) < 0.5) fireballDMGMulti += 0.5;
+					// +20% Fireball and Lightning DMG;
+					if (this.dragonVariant === `WISE`) fireballDMGMulti += 0.2;
+					// +15% Fireball and Lightning DMG;
+					if (this.dragonVariant === `SUPERIOR`) fireballDMGMulti += 0.15;
+
+
+
+					/* Rush DMG Calculation */
+					const fireballDMG = Math.floor((1_700 * fireballDMGMulti) * (1 - dmgResist));
+					// Deal 20% of the players Health in True DMG
+					const fireballTrueDMG = Math.floor(userObj.health.current * 0.20);
+
+					userObj.health.current -= Math.floor(fireballDMG + fireballTrueDMG);
 
 					res.push(
 						{
 							user: this.guild.members.cache.get(targetUser),
-							damage: finalFireballDmg,
-							original: fireballDamage,
-							blocked: dmgResist
+							damage: fireballDMG,
+							dmgResist: dmgResist,
+							trueDamage: fireballTrueDMG,
+							originalDamage: Math.floor(1_700 * fireballDMGMulti)
 						}
 					);
 				}
@@ -218,25 +271,40 @@ class DragonFight extends EventEmitter {
 				const res = [];
 
 				for (const targetUser of targetUsers) {
-					const userObj = this.dragonDamage.get(targetUser);
-					const dmgResist = Math.floor(SkyblockMechanicUtil.getDamageReduction(userObj.defense) * 100);
+					const userObj = this.playerDragonDamage.get(targetUser);
+					// This is the DMG% the user will ignore.
+					const dmgResist = (Math.floor(SkyblockMechanicUtil.getDamageReduction(defense) * 100) / 100);
 
-					const lightningDamage = [`STRONG`, `SUPERIOR`, `UNSTABLE`].includes(this.dragonVariant)
-						// This is the lightningDamage for a `STRONG`, `SUPERIOR` and `UNSTABLE` type Dragon.
-						? Functions.getRandomNumber((health * 0.6), (health * 0.7))
-						// This is the lightningDamage for the other Dragons.
-						: Functions.getRandomNumber((health * 0.4), (health * 0.5));
 
-					const finalLightningDmg = lightningDamage - Math.floor(lightningDamage * (dmgResist / 100));
 
-					userObj.health.current -= finalLightningDmg;
+					/* Multiplier Calculation */
+					let lightningDMGMulti = 1;
+
+					// +50% if HP < 50% Max HP
+					if ((this.dragonHealth / dragonMaxHP) < 0.5) lightningDMGMulti += 0.5;
+					// +20% Fireball and Lightning DMG;
+					if (this.dragonVariant === `WISE`) lightningDMGMulti += 0.2;
+					// +15% Fireball and Lightning DMG;
+					if (this.dragonVariant === `SUPERIOR`) lightningDMGMulti += 0.15;
+
+
+
+					/* Lightning DMG Calculation */
+					const lightningDMG = Math.floor((1_700 * lightningDMGMulti) * (1 - dmgResist));
+					// Deal 20% of the players Health in True DMG
+					const lightningTrueDMG = Math.floor(userObj.health.current * 0.20);
+
+					userObj.health.current -= Math.floor(lightningDMG + lightningTrueDMG);
+
+
 
 					res.push(
 						{
 							user: this.guild.members.cache.get(targetUser),
-							damage: finalLightningDmg,
-							original: lightningDamage,
-							blocked: dmgResist
+							damage: lightningDMG,
+							dmgResist: dmgResist,
+							trueDamage: lightningTrueDMG,
+							originalDamage: Math.floor(1_700 * lightningDMGMulti),
 						}
 					);
 				}
@@ -245,21 +313,23 @@ class DragonFight extends EventEmitter {
 				atkType = `LIGHTNING`;
 			}
 
-			const deadUsers = this.dragonDamage
+			const deadUsers = this.playerDragonDamage
 				.filter(user => user.health.current <= 0)
 				.map((_userObj, user) => this.guild.members.cache.get(user));
 
 			if (deadUsers.length > 0) this.emit('playerDeaths', deadUsers, atkType);
 		}
+
+		return damage;
 	}
 
 	filterAliveUser() {
-		const aliveUsers = this.dragonDamage
+		const aliveUsers = this.playerDragonDamage
 			.filter(user => user.health.current > 0);
 
 		if (!aliveUsers.size) return this.emit('dragonFlee', null);
 
-		this.dragonDamage = aliveUsers;
+		this.playerDragonDamage = aliveUsers;
 	}
 
 	addDragonWeight(userId, dragonWeight) {

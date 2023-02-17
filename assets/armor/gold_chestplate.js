@@ -41,8 +41,7 @@ module.exports = new Armor(
 			value: `<:Golden_Chestplate:948133358033068043>`
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
 		},
 		onEquip(_interaction, maidObj) {
 			maidObj.chestplate = this.emoji.name;

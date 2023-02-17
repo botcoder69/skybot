@@ -22,8 +22,7 @@ module.exports = new Item(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
 		},
 		includeInParsing: true
 	}

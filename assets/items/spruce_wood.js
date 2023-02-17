@@ -7,7 +7,7 @@ module.exports = new Item(
 		group: "Item",
 		name: `Spruce Wood`,
 		keyName: "spruceWood",
-		description: "A piece of spruce wood found from the Floating Islands. Used to make planks.",
+		description: "A piece of Spruce Wood, found from chopping fully grown Spruce Trees in the Floating Islands. Can be used to make planks.",
 		rarity: "Common",
 		emoji: {
 			name: `<:Spruce_Log:885390554404380693>`,
@@ -25,14 +25,23 @@ module.exports = new Item(
 		},
 		sellall: {
 			included: true,
-			filterGroup: "woodworking"
+			filterGroup: `woodworking`
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Spruce`,
+				emoji: `<:Spruce_Log:885390554404380693>`
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 2,
+				itemPrecedence: 1
+			}
 		},
 		includeInParsing: true,
-		levelReq: {
-			emoji: `<:Foraging:885390554291122206>`,
-			id: `chopLevel`,
-			level: 12,
-			skill: `Foraging`
-		}
 	}
 );

@@ -3,10 +3,9 @@ const { Item } = require('../../SkyblockHelper/src/index.js');
 
 module.exports = new Item(
 	{
-		group: `Item`,
 		name: `Enchanted Birch Wood`,
 		keyName: `enchantedBirchWood`,
-		description: ``,
+		description: `A rare piece of Birch Wood. Due to it's resillent endurance against some natural factors, it's usually used in making sturdier wooden huts and houses.`,
 		rarity: `Uncommon`,
 		emoji: {
 			name: `<:Enchanted_Birch_Wood:900308905786224700>`,
@@ -23,8 +22,22 @@ module.exports = new Item(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Birch`,
+				emoji: `<:Birch_Log:885390554400165938>`
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 3,
+				itemPrecedence: 2
+			}
 		},
 		crafting: {
 			type: `oneItem`,

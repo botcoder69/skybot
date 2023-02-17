@@ -24,8 +24,7 @@ module.exports = new LootBox(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
 		},
 		includeInParsing: false,
 		coins: {

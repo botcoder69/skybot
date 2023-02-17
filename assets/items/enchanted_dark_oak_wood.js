@@ -3,10 +3,9 @@ const { Item } = require('../../SkyblockHelper/src/index.js');
 
 module.exports = new Item(
 	{
-		group: `Item`,
 		name: `Enchanted Dark Oak Wood`,
 		keyName: `enchantedDarkOakWood`,
-		description: ``,
+		description: `A rare piece of Dark Oak Wood. Due to it's resillent endurance against some natural factors, it's usually used in making sturdier wooden huts and houses.`,
 		rarity: `Uncommon`,
 		emoji: {
 			name: `<:Enchanted_Dark_Oak_Wood:900308904360157245>`,
@@ -30,6 +29,21 @@ module.exports = new Item(
 			type: `oneItem`,
 			materials: [[`dark oak wood`, `darkOakWood`, `<:Dark_Oak_Log:885390554362433587>`, 160]],
 			outputs: 1
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Dark Oak`,
+				emoji: `<:Birch_Log:885390554400165938>`
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 4,
+				itemPrecedence: 2
+			}
 		},
 		includeInParsing: true,
 		levelReq: {

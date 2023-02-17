@@ -38,6 +38,8 @@ class BaseItem {
 		this.enchanted = data.enchanted ?? null;
 
 		this.levelReq = data.levelReq ?? null;
+
+		this.bazaar = data.bazaar ?? null;
 	}
 
 	

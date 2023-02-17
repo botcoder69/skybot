@@ -37,7 +37,7 @@ module.exports = new Sword(
 			outputs: 1
 		},
 		sword: {
-			itemAbility: `**Abiity: Aery**\nKilling an enemy grants you spirit butterflies, and each spirit butterfly increases the base damage of this sword. Spirit butterflies are capped at 12,375.`
+			itemAbility: `**Abiity: Aery**\nKilling an enemy grants you spirit butterflies, and each spirit butterfly increases the base damage of this sword. Spirit butterflies are capped at 49,875.`
 		},
 		onEquip(interaction, maidObj) {
 			const swordObj = {
@@ -77,7 +77,7 @@ module.exports = new Sword(
 
 					interaction.channel.send(`Your <:Aspect_Of_The_Spirit_Butterfly:945957788155273226> **Aspect of the Spirit Butterfly** gained **1x** <:Spirit_Butterfly:942633700485632071> **Spirit Butterfly** after that kill! (${commafy(sword.spiritButterflies)} / 49,875)`);
 				} else {
-					interaction.channel.send(`Your <:Aspect_Of_The_Spirit_Butterfly:945957788155273226> **Aspect of the Spirit Butterfly** has been maxed already!`);
+					interaction.channel.send(`Your <:Aspect_Of_The_Spirit_Butterfly:945957788155273226> **Aspect of the Spirit Butterfly** has reached the maximum capacity of Spirit Butterflies!`);
 				}
 			},
 			getBaseDamage(sword) {

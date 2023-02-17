@@ -54,13 +54,14 @@ declare class SkybotDatabaseHandler<Datatype = any> {
 	/**
 	 * Gets a key from the Database.
 	 * @param key The key you want to get.
+	 * @param database If specified, it will get the key from the specified Database instead of finding the database where the key existse.
 	 */
-	public get(key: string): Promise<Datatype>;
+	public get(key: string, database?: SkybotDatabase): Promise<Datatype>;
 	/**
 	 * Sets a key with a value to a Database.
 	 * @param key The key you want to assign this value to
 	 * @param value The value of the key.
-	 * @param database If specified, it will set the key to the desired Database instead of finding one for you if it fails to find the parent database.
+	 * @param database If specified, it will set the key to the desired Database instead of finding one for you.
 	 */
 	public set(key: string, value: Datatype, database?: SkybotDatabase): Promise<void>;
 	/**

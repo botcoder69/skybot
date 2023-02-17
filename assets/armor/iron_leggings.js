@@ -23,8 +23,7 @@ module.exports = new Armor(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
 		},
 		crafting: {
 			type: "oneItem",

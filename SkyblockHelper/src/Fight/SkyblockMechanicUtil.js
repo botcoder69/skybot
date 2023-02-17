@@ -3,8 +3,9 @@ const { EmbedBuilder } = require('discord.js');
 const SkyblockHelperError = require('../errors/SkyblockHelperError');
 const Sword = require('../structures/Sword');
 const Mob = require('./Mob');
+const SkyblockTypes = require('../utils/SkyblockTypes');
 const { firstStrike, sharpness, critical, execute, lifeSteal } = require('./EnchantmentUtil');
-const { commafy, sliceIntoChunks, getRandomNumber } = require('../utils/Functions');
+const { commafy, sendNotification, sliceIntoChunks, getSettingValue, getRandomNumber } = require('../utils/Functions');
 let registeredStatusEffects = [];
 
 class SkyblockMechanicUtil {
@@ -100,7 +101,7 @@ class SkyblockMechanicUtil {
 	}
 
 	/**
-	 * Takes in defense to return a players "Damage Reduction"
+	 * Takes in defense to return a entity's "Damage Reduction"
 	 * @param {number} defense The amount of defense the player has
 	 * @returns {number}
 	 */
@@ -295,6 +296,127 @@ class SkyblockMechanicUtil {
 			.setTitle(options.title)
 			.addFields(value)
 		);
+	}
+
+	/**
+	 * Takes into account the enchantments, the sword, strength, etc. to get the damage and healing.
+	 * @param {{ critChance: number; swordFile: Object; mob: Object; maidObj: Object; strength: number; playerHealth.current: number; }} info
+	 */
+	static getDamage(info) {
+		const { critChance, swordFile, mob, maidObj, strength, health } = info;
+	
+		const baseDamage = swordFile?.swordFunc?.getBaseDamage?.(maidObj.sword) || maidObj.sword.baseDamage;
+		const crit = this.criticalHit(30 + critChance);
+		let addedDamage = 0,
+			playerHeal = 0;
+	
+		addedDamage += firstStrike(maidObj.sword.enchantments, mob, baseDamage);
+		addedDamage += sharpness(maidObj.sword.enchantments, baseDamage);
+		addedDamage += critical(maidObj.sword.enchantments, baseDamage, crit);
+		addedDamage += execute(maidObj.sword.enchantments, mob, addedDamage);
+	
+		playerHeal += lifeSteal(maidObj.sword.enchantments, health);
+	
+		return {
+			damage: SkyblockMechanicUtil.getDealtDamage(
+				baseDamage,
+				strength,
+				crit,
+				undefined,
+				addedDamage
+			),
+			healing: playerHeal,
+			crit: crit
+		};
+	}
+	
+	/**
+		 * Performs death. 
+		 * @param {User} user
+		 * @param {{}} maidObj 
+		 * @param {string} deathMsg A message. Something like: `You died while trying to sing Never Gonna Give You Up` 
+		 * @returns {Promise<number>} 
+		 * An enum representing what happened:
+		 * 0 = The user died.
+		 * 1 = The user's coins were saved, but they still died.
+		 * 2 = The user was saved from death.
+		 */
+	static async performDeath(user, maidObj, deathMsg, db) {
+		const estiLostCoins = Math.floor(maidObj.coins / 2);
+	
+		const deathEmbed = new EmbedBuilder()
+			.setColor(`Red`);
+	
+		let returnNum = 0,
+			coinLossPercent = 1,
+			usedItem = null;
+	
+		if (getSettingValue(maidObj, 'developerOverride_Safeguard')) {
+			deathEmbed
+				.setTitle('Developer Overrides: Safeguard saved you from certain death!')
+				.setDescription(`${deathMsg}, but the game code saw you had \`Developer Overrides: Safeguard\` active, which prevented you from dying!`);
+		
+			returnNum = 2;
+			coinLossPercent = 0;
+		} else if (maidObj.remnantOfTheEye > 0 && (maidObj.mine === SkyblockTypes.SkyblockMines.TheEnd || maidObj.mine === SkyblockTypes.SkyblockMines.DragonsNest)) {
+			deathEmbed
+				.setTitle('Your Remnant of the Eye saved you from certain death!')
+				.setDescription(`${deathMsg}, but you had a <:Remnant_of_the_Eye:978135927060824086> **Remnant of the Eye** in your inventory, which prevented you from dying!`);
+		
+			usedItem = 'remnantOfTheEye';
+			returnNum = 2;
+			coinLossPercent = 0;
+		} else if (maidObj.piggyBank > 0 && estiLostCoins > 20_000) {
+			deathEmbed
+				.setTitle('Your Piggy Bank protected you!')
+				.setDescription(`${deathMsg}, but you had a <:Piggy_Bank:953469473480921098> **Piggy Bank** in your inventory, which prevented you from losing any coins. Your <:Piggy_Bank:953469473480921098> **Piggy Bank** is now a <:Cracked_Piggy_Bank:953469273546846278> **Cracked Piggy Bank**`);
+	
+			usedItem = 'piggyBank';
+			returnNum = 1;
+			coinLossPercent = 0;
+		} else if (maidObj.crackedPiggyBank > 0 && estiLostCoins > 20_000) {
+			deathEmbed
+				.setTitle('Your Cracked Piggy Bank protected you!')
+				.setDescription(`${deathMsg}, but you had a <:Cracked_Piggy_Bank:953469273546846278> **Cracked Piggy Bank** in your inventory, which prevented you from losing ~75% of coins. Your <:Cracked_Piggy_Bank:953469273546846278> **Cracked Piggy Bank** is now a <:Broken_Piggy_Bank:953468878602772561> **Broken Piggy Bank**. You lost <:Coins:885677584749318154> **${commafy(Math.floor(estiLostCoins * 0.25))}**`);
+	
+			usedItem = 'crackedPiggyBank';
+			returnNum = 1;
+			coinLossPercent = 0.25;
+		} else {
+			deathEmbed
+				.setTitle('You died!')
+				.setDescription(`${deathMsg}! You lost <:Coins:885677584749318154> **${commafy(estiLostCoins)}**`);
+	
+			returnNum = 0;
+			coinLossPercent = 1;
+		}		
+			
+		maidObj.coins -= (estiLostCoins * coinLossPercent);
+	
+		if (usedItem === `piggyBank`) {
+			maidObj.piggyBank -= 1;
+			maidObj.crackedPiggyBank += 1;
+		} else if (usedItem === `crackedPiggyBank`) {
+			maidObj.crackedPiggyBank -= 1;
+			maidObj.brokenPiggyBank -= 1;
+		} else if (usedItem === `remnantOfTheEye`) {
+			maidObj.remnantOfTheEye -= 1;
+		}
+	
+		if ('deaths' in maidObj) {
+			maidObj.deaths += 1;
+		} else {
+			maidObj.deaths = 1;
+		}
+			
+		await sendNotification(
+			deathEmbed,
+			user,
+		);
+	
+		await db.set(user.id, maidObj);
+	
+		return returnNum;
 	}
 }
 

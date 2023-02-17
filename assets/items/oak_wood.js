@@ -7,7 +7,7 @@ module.exports = new Item(
 		group: "Item",
 		name: `Oak Wood`,
 		keyName: "oakWood",
-		description: "A piece of oak wood found from the Floating Islands. Used to make planks.",
+		description: "A piece of Oak wood, found from chopping fully grown Oak Trees in the Floating Islands. Can be used to make planks.",
 		rarity: "Common",
 		emoji: {
 			name: `<:Oak_Log:885390554005897237>`,
@@ -25,7 +25,22 @@ module.exports = new Item(
 		},
 		sellall: {
 			included: true,
-			filterGroup: "woodworking"
+			filterGroup: `woodworking`
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Oak`,
+				emoji: `<:Oak_Log:885390554005897237>`
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 1,
+				itemPrecedence: 1
+			}
 		},
 		includeInParsing: true
 	}

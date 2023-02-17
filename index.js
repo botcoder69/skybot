@@ -6,7 +6,7 @@ const timeCodeStarted = Date.now();
 const CodeHandler = require('./Handlers');
 const fs = require('fs');
 const Util = require('./Util');
-const { ActionRowBuilder, ActivityType, ButtonBuilder, ButtonStyle, Client, Collection, EmbedBuilder, Events, GatewayIntentBits, PresenceUpdateStatus, version: DiscordJSVersion } = require('discord.js');
+const { ActionRowBuilder, ActivityType, ButtonBuilder, ButtonStyle, Client, Collection, EmbedBuilder, Events, GatewayIntentBits, PresenceUpdateStatus, version: DiscordJSVersion, SnowflakeUtil } = require('discord.js');
 const { CachedDatabase, Functions, SkybotDatabase, SkybotDatabaseHandler, SkyblockTypes, extendNativeClasses, version: SkyblockHelperVersion } = require('./SkyblockHelper/src/index');
 const { RESTEvents } = require('@discordjs/rest');
 
@@ -105,8 +105,8 @@ class SkybotClient extends Client {
 }
 
 /* Initiate some classes from the libraries */
-// const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzE2NTQ3MTYsImlhdCI6MTY3MTU0MzExNiwiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.ulyYjdhZ69zAx1BBDjtuyMksfdeivbXdvLDVCwAI7A1IUmLKCeF5I9carfIvlEanXtiCFsnbd-BPHkl0WODghg`);
-
+const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzY3MjM1MDcsImlhdCI6MTY3NjYxMTkwNywiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.dDuAXt_c0wqMwwcEWndyrJ20Rhw_RwtyBG5Mnxs9T6ywiARDmSkM1DnUjhS-kiSIlRm4MkTvyhjaZOYhdRGUSw`);
+/*
 const db = new SkybotDatabaseHandler()
 	.setDebugMode(true)
 	.setRequestRetries(Infinity)
@@ -193,7 +193,7 @@ const db = new SkybotDatabaseHandler()
 
 		return userObj;
 	});
-
+*/
 extendNativeClasses(
 	{
 		extendArray: true,
@@ -228,6 +228,7 @@ const client = new SkybotClient(
 		shards: 'auto'
 	}
 );
+
 
 
 
@@ -372,8 +373,8 @@ client.once(Events.ClientReady, async () => {
 	client.console.push(`${getUTCTime()} [Database][Logging] | Initializing Database...`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Initializing Database...`);
 
-	// await db.fetchDatabaseEntries([`518736428721635338`]);
-	await db.init();
+	await db.fetchDatabaseEntries([`518736428721635338`]);
+	// await db.init();
 
 	client.console.push(`${getUTCTime()} [Database][Logging] | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
@@ -443,7 +444,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		) return interaction.reply(`Hello ${interaction.user}, it seems like you're using the legacy database key system! Please use the \`/fix database\` command in order to update your database keys to the latest version.`);
 		*/
 
-		if (!tutorial && !start && (interaction.commandName !== `tutorial` && interaction.commandName !== `dev`)) return interaction.reply(`Hello ${interaction.user}, it seems like you are new! If you want to learn how to play Skybot, you can do so by using \`/tutorial\`!`);
+		if (!tutorial && !start && slashCommand?.require?.start) return interaction.reply(`Hello ${interaction.user}, it seems like you are new! If you want to learn how to play Skybot, you can do so by using \`/tutorial\`!`);
 
 		const handler = new CodeHandler()
 			.setClient(client)

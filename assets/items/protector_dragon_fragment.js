@@ -25,7 +25,19 @@ module.exports = new Item(
 		},
 		sellall: {
 			included: false,
-			filterGroup: ""
+		},
+		bazaar: {
+			category: {
+				name: `Combat`,
+			},
+			subcategory: { 
+				name: `Dragon Fragments` 
+			},
+			precedence: {
+				categoryPrecedence: 5,
+				subcategoryPrecedence: 5,
+				itemPrecedence: 1
+			}
 		},
 		includeInParsing: true
 	}

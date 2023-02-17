@@ -3,10 +3,9 @@ const { Item } = require('../../SkyblockHelper/src/index.js');
 
 module.exports = new Item(
 	{
-		group: `Item`,
 		name: `Enchanted Acacia Wood`,
 		keyName: `enchantedAcaciaWood`,
-		description: ``,
+		description: `A rare piece of Acacia Wood. Due to it's resillent endurance against some natural factors, it's usually used in making sturdier wooden huts and houses.`,
 		rarity: `Uncommon`,
 		emoji: {
 			name: `<:Enchanted_Acacia_Wood:900308906167922688>`,
@@ -23,8 +22,22 @@ module.exports = new Item(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Acacia`,
+				emoji: `<:Acacia_Log:885390554471485480>` 
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 5,
+				itemPrecedence: 2
+			}
 		},
 		crafting: {
 			type: `oneItem`,

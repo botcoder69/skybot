@@ -15,14 +15,6 @@ const xpGains = {
 	pureDiamond: 100
 };
 
-// These are the breaking powers for each pickaxe
-const toolMap = new Map();
-toolMap.set(`<:Wooden_Pickaxe:817217441394196572>`, 1);
-toolMap.set(`<:Gold_Pickaxe:817216581859409971>`, 1);
-toolMap.set(`<:Stone_Pickaxe:817216446899028011>`, 2);
-toolMap.set(`<:Iron_Pickaxe:817216520828092436>`, 3);
-toolMap.set(`<:Diamond_Pickaxe:817216616084930602>`, 4);
-
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('mine')

@@ -3,14 +3,13 @@ const { Item } = require('../../SkyblockHelper/src/index.js');
 
 module.exports = new Item(
 	{
-		group: "Item",
 		name: `Enchanted Jungle Wood`,
-		keyName: "enchantedJungleWood",
-		description: "",
+		keyName: `enchantedJungleWood`,
+		description: `A rare piece of Acacia Wood. Due to it's resillent endurance against some natural factors, it's usually used in making sturdier wooden huts and houses.`,
 		rarity: "Uncommon",
 		emoji: {
 			name: `<:Enchanted_Jungle_Wood:900308904230158336>`,
-			url: "https://cdn.discordapp.com/emojis/900308904230158336.png",
+			url: `https://cdn.discordapp.com/emojis/900308904230158336.png`,
 		},
 		NPC: {
 			sell: {
@@ -23,8 +22,22 @@ module.exports = new Item(
 			}
 		},
 		sellall: {
-			included: false,
-			filterGroup: ""
+			included: false
+		},
+		bazaar: {
+			category: {
+				name: `Woods and Fishes`,
+				emoji: `<:Fishing:885390554450501632>`
+			},
+			subcategory: { 
+				name: `Jungle`,
+				emoji: `<:Jungle_Log:885390554240802817>`
+			},
+			precedence: {
+				categoryPrecedence: 4,
+				subcategoryPrecedence: 6,
+				itemPrecedence: 1
+			}
 		},
 		crafting: {
 			type: `oneItem`,

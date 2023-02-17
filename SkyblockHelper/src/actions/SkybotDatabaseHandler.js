@@ -1,11 +1,11 @@
 
 /* eslint-disable no-await-in-loop, no-console, no-return-await, no-unused-vars */
 
-const chalk = require('chalk');
-const { Collection } = require("discord.js");
-const SkybotDatabase = require('./SkybotDatabase');
 const Functions = require('../utils/Functions');
+const SkybotDatabase = require('./SkybotDatabase');
 const SkyblockHelperError = require('../errors/SkyblockHelperError');
+const { Collection } = require("discord.js");
+const chalk = require('chalk');
 
 class SkybotDatabaseHandler {
 	constructor() {
@@ -96,30 +96,45 @@ class SkybotDatabaseHandler {
 
 
 
-	async get(key) {
+	async get(key, preferredDatabase=null) {
 		const startTs = Date.now();
 
-		this.debug(`get() | Finding parent SkybotDatabase for '${key}'`);
-		const parentDatabase = await this.getParentDatabase(key);
-		if (parentDatabase) {
-			this.debug(`get() | Parent SkybotDatabase for '${key}' has been found: '${parentDatabase.friendlyName}'!`);
+		this.debug(`get() | Checking preferred database for '${key}'`);
+		if (preferredDatabase && preferredDatabase instanceof SkybotDatabase) {
+			this.debug(`set() | Preferred SkybotDatabase for '${key}' has been found: '${preferredDatabase.friendlyName}'!`);
+
+			this.debug(`get() | Sending 'GET' Request to '${preferredDatabase.friendlyName}'`); 
+			const value = await preferredDatabase.database.get(key);
+			this.debug(`get() | 'GET' request complete!`); 
+
+			this.debug(`get() | Finished processing 'GET' function in ${Date.now() - startTs}ms.`);
+
+			return value;
 		} else {
-			this.debug(`get() | Parent SkybotDatabase for '${key}' cannot be found!`);
+			this.debug(`set() | Preferred SkybotDatabase for '${key}' cannot be found! Initiating fallback to default function...`);
+
+			this.debug(`get() | Finding parent SkybotDatabase for '${key}'`);
+			const parentDatabase = await this.getParentDatabase(key);
+			if (parentDatabase) {
+				this.debug(`get() | Parent SkybotDatabase for '${key}' has been found: '${parentDatabase.friendlyName}'!`);
+			} else {
+				this.debug(`get() | Parent SkybotDatabase for '${key}' cannot be found!`);
+			}
+
+			if (!parentDatabase) {
+				this.debug(`get() | Returning early: Cannot find parent SkybotDatabase for '${key}'`); 
+
+				return null;
+			}
+
+			this.debug(`get() | Sending 'GET' Request to '${parentDatabase.friendlyName}'`); 
+			const value = await parentDatabase.database.get(key);
+			this.debug(`get() | 'GET' request complete!`); 
+
+			this.debug(`get() | Finished processing 'GET' function in ${Date.now() - startTs}ms.`);
+
+			return value;
 		}
-
-		if (!parentDatabase) {
-			this.debug(`get() | Returning early: Cannot find parent SkybotDatabase for '${key}'`); 
-
-			return null;
-		}
-
-		this.debug(`get() | Sending 'GET' Request to '${parentDatabase.friendlyName}'`); 
-		const value = await parentDatabase.database.get(key);
-		this.debug(`get() | 'GET' request complete!`); 
-
-		this.debug(`get() | Finished processing 'GET' function in ${Date.now() - startTs}ms.`);
-
-		return value;
 	}
 
 	/**
@@ -129,7 +144,7 @@ class SkybotDatabaseHandler {
 		const startTs = Date.now();
 
 		this.debug(`set() | Checking preferred SkybotDatabase for '${key}'`);
-		if (preferredDatabase) {
+		if (preferredDatabase && preferredDatabase instanceof SkybotDatabase) {
 			this.debug(`set() | Preferred SkybotDatabase for '${key}' has been found: '${preferredDatabase.friendlyName}'!`);
 		} else {
 			this.debug(`set() | Preferred SkybotDatabase for '${key}' cannot be found!`);
@@ -160,8 +175,8 @@ class SkybotDatabaseHandler {
 		 * behind `/start`, and `/start` has a function to see if there is an available `SkybotDatabase` it can 
 		 * save data to.
 		 */
-		this.debug(`set() | Choosing database based on precedence: parentDatabase, preferredDatabase, newDatabase.`);
-		const database = parentDatabase ?? preferredDatabase ?? newDatabase;
+		this.debug(`set() | Choosing database based on precedence: preferredDatabase, parentDatabase, newDatabase.`);
+		const database = preferredDatabase ?? parentDatabase ?? newDatabase;
 		if (parentDatabase) {
 			this.debug(`set() | SkybotDatabase for '${key}' has been chosen: '${database.friendlyName}' (parent).`);
 		} else if (preferredDatabase) {

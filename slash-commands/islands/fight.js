@@ -305,12 +305,8 @@ module.exports = {
 				if (Date.now() >= dragonFight.cooldown) {
 					const registeredUsers = await Functions.collectAllGuildUserObjs(db, interaction.guild);
 
-					const allowedUsers = registeredUsers
-						.filter(userObj => userObj.mine === SkyblockTypes.SkyblockMines.DragonsNest)
-						.map((_userObj, user) => user);
-
 					allowSet = false;
-					interaction.client.dragonFights.set(interaction.guildId, { dragonFight: new DragonFight(interaction.guild), allowedUsers: allowedUsers });
+					interaction.client.dragonFights.delete(interaction.guildId);
 
 					const cooldownEmbed = new EmbedBuilder()
 						.setColor(`#2f3136`)
@@ -318,7 +314,7 @@ module.exports = {
 						.setThumbnail(`https://static.wikia.nocookie.net/hypixel-skyblock/images/0/0a/Ender_Dragon.gif/revision/latest?cb=20220323212900`)
 						.setDescription(`This Guild has just challenged the Ender Dragon recently! You can summon it again <t:${Math.floor(dragonFight.cooldown / 1000)}:R>.`);
 
-					interaction.client.cooldowns.get('fight').delete(maid);
+					interaction.client.cooldowns.get('fight')?.delete(maid);
 
 					return interaction.reply({ embeds: [cooldownEmbed], ephemeral: true });
 				} else {
@@ -328,7 +324,7 @@ module.exports = {
 						.setThumbnail(`https://static.wikia.nocookie.net/hypixel-skyblock/images/0/0a/Ender_Dragon.gif/revision/latest?cb=20220323212900`)
 						.setDescription(`This Guild has just challenged the Ender Dragon recently! You can summon it again <t:${Math.floor(dragonFight.cooldown / 1000)}:R>.`);
 
-					interaction.client.cooldowns.get('fight').delete(maid);
+					interaction.client.cooldowns.get('fight')?.delete(maid);
 
 					return interaction.reply({ embeds: [cooldownEmbed], ephemeral: true });
 				}
@@ -377,7 +373,7 @@ module.exports = {
 					}
 				}
 
-				interaction.client.cooldowns.get('fight').delete(guildMember.id);
+				interaction.client.cooldowns.get('fight')?.delete(guildMember.id);
 			});
 
 			dragonFight.on(`eyeRemove`, async guildMember => {
@@ -385,7 +381,7 @@ module.exports = {
 
 				await interaction.channel.send({ content: `${guildMember} removed their <:Summoning_Eye:976317456463314994> **Summoning Eye**!` });
 
-				interaction.client.cooldowns.get('fight').delete(guildMember.id);
+				interaction.client.cooldowns.get('fight')?.delete(guildMember.id);
 			});
 
 			dragonFight.on(`dragonSummon`, async type => {	
@@ -401,11 +397,10 @@ module.exports = {
 
 				const damagedUsers = affectedUsers
 					.map(atkObj => {
-						if (atkObj.blocked > 0) {
-							return `${atkObj.user}: -${commafy(atkObj.damage)} <:Health:944105139944452157> (-${commafy(atkObj.original)} <:Health:944105139944452157>, **-${atkObj.blocked}%**)`;
-						} else {
-							return `${atkObj.user}: -${commafy(atkObj.damage)} <:Health:944105139944452157>`;
-						}
+						// console.log({ user: atkObj.user.user.username, damage: atkObj.damage, dmgResist: atkObj.dmgResist, trueDamage: atkObj.trueDamage, originalDamage: atkObj.originalDamage });
+
+						if (atkObj.dmgResist > 0) return `${atkObj.user}: -${commafy(atkObj.damage + atkObj.trueDamage)} <:Health:944105139944452157> (<:Strength:944105109703512115> **${commafy(atkObj.damage)} Damage** (<:Strength:944105109703512115> **${commafy(atkObj.originalDamage)} Damage** (**-${atkObj.dmgResist * 100}%**)) + <:True_Damage:1067788212631765012> **${commafy(atkObj.trueDamage)} True Damage)**`;
+						else return `${atkObj.user}: -${commafy(atkObj.damage + atkObj.trueDamage)} <:Health:944105139944452157> (<:Strength:944105109703512115> ${commafy(atkObj.originalDamage)} Damage + <:True_Damage:1067788212631765012> ${commafy(atkObj.trueDamage)} True Damage)`;
 					})
 					.join('\n');
 
@@ -435,19 +430,19 @@ module.exports = {
 
 					switch (deathEnum) {
 					case 2: {
-						newUserObj.mine = `dragons_nest`;
+						newUserObj.mine = SkyblockTypes.SkyblockMines.DragonsNest;
 
-						const userDragonFightObj = dragonFight.dragonDamage.get(user.id);
+						const userDragonFightObj = dragonFight.playerDragonDamage.get(user.id);
 						
 						// Revive the user.
 						userDragonFightObj.dead = false;
 						userDragonFightObj.health.current = userDragonFightObj.health.initial;
 
-						dragonFight.dragonDamage.set(user.id, userDragonFightObj);
+						dragonFight.playerDragonDamage.set(user.id, userDragonFightObj);
 						break;
 					}
 					default:
-						newUserObj.mine = `the_end`;
+						newUserObj.mine = SkyblockTypes.SkyblockMines.TheEnd;
 
 						realDeadUsers.push(user);
 						break;
@@ -456,12 +451,14 @@ module.exports = {
 					await db.set(user.id, newUserObj);
 				}
 
-				// To allow more "flexible" functionality, the function to filter out alive users is here instead of built-in.
+				// To allow more "flexible" functionality, the function to filter out alive users is used here instead of being built-in.
 				dragonFight.filterAliveUser();
 
 				realDeadUsers
 					.map(user => `${user} was killed by ${dragonTypeResolver[dragonFight?.dragonVariant]} Dragon.`)
 					.join('\n');
+
+				if (!realDeadUsers.length) return;
 
 				const dragonAttackEmbed = new EmbedBuilder()
 					.setColor(`#ff5555`)
@@ -471,7 +468,7 @@ module.exports = {
 							.join('\n')
 					);
 
-				if (realDeadUsers.length) await interaction.channel.send({ embeds: [dragonAttackEmbed] });
+				await interaction.channel.send({ embeds: [dragonAttackEmbed] });
 			});
 
 			dragonFight.on(`dragonFlee`, async () => {
@@ -690,7 +687,7 @@ module.exports = {
 			if (dragonFight.isOngoingFight()) {
 				const existingDragonFight = interaction.client.dragonFights
 					.filter((_guildDragonFight, guildId) => guildId !== interaction.guild.id)
-					.find(guildDragonFight => guildDragonFight.dragonFight?.dragonDamage.has(interaction.user.id));
+					.find(guildDragonFight => guildDragonFight.dragonFight?.playerDragonDamage.has(interaction.user.id));
 
 				const key = interaction.client.dragonFights
 					.findKey(value => value.dragonFight === existingDragonFight);
@@ -727,14 +724,14 @@ module.exports = {
 					}
 				);
 
-				dragonFight.addDragonDamage(
+				const dealtDamage = dragonFight.addDragonDamage(
 					maid, 
 					damage.damage, 
 					playerInfo.health, 
 					playerInfo.defense
 				);
 
-				const userDragonFightObj = dragonFight.dragonDamage.get(maid);
+				const userDragonFightObj = dragonFight.playerDragonDamage.get(maid);
 				
 				if ((userDragonFightObj.health.current + damage.healing) > userDragonFightObj.health.initial) {
 					// To prevent the user from "overhealing"
@@ -746,7 +743,7 @@ module.exports = {
 
 				const dragonFightEmbed = new EmbedBuilder()
 					.setColor(`#2f3136`)
-					.setDescription(`${swordFile.displayEmojiName()} You dealt <:Normal_Hit:968705475677913138> **${Functions.commafy(damage.damage > 500_000 ? 500_000 : damage.damage)} damage** to the <:Ender_Dragon:976294742381973524> **${dragonTypeResolver[dragonFight.dragonVariant]} Dragon**\n\nDragon Health: ${Functions.commafy(dragonFight?.dragonHealth)} <:Health:944105139944452157>\nYour Damage: ${Functions.commafy(dragonFight.dragonDamage.get(maid).damage)} <:Damage:978132398615183462>\nYour Health: ${Functions.commafy(Math.floor(dragonFight.dragonDamage.get(maid).health.current))} <:Health:944105139944452157>`);
+					.setDescription(`${swordFile.displayEmojiName()} You dealt ${damage.crit ? `<:Critical_Hit:968705500390756403>` : `<:Normal_Hit:968705475677913138>`} **${Functions.commafy(dealtDamage)} damage** to the <:Ender_Dragon:976294742381973524> **${dragonTypeResolver[dragonFight.dragonVariant]} Dragon**\n\nDragon Health: ${Functions.commafy(dragonFight?.dragonHealth)} <:Health:944105139944452157>\nYour Damage: ${Functions.commafy(dragonFight.playerDragonDamage.get(maid).damage)} <:Damage:978132398615183462>\nYour Health: ${Functions.commafy(Math.floor(dragonFight.playerDragonDamage.get(maid).health.current < 0 ? 0 : dragonFight.playerDragonDamage.get(maid).health.current))} <:Health:944105139944452157>`);
 
 				await interaction.reply({ embeds: [dragonFightEmbed], ephemeral: true });
 			}
