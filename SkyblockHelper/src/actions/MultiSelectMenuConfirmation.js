@@ -94,7 +94,7 @@ class MultiSelectMenuConfirmation extends EventEmitter {
 			// Check if baseOption has childOptions. this.checkChildOptions() ignores a blank childOptions.
 			if (baseOption.childOptions.length > 0) {
 
-				// Check every single childOption inside baseOptions and repeat cycle. 
+				// Check every single childOption inside baseOptions and repeat cycle.
 				for (const childOption1 of baseOption.childOptions) {
 					this.checkChildOptions(childOption1);
 					optionMap.set(childOption1.data.value, { selectMenuId: `childOption2`, childOptions: childOption1.childOptions });

@@ -1,23 +1,21 @@
+/* eslint-disable no-mixed-operators */
+/* eslint-disable no-param-reassign */
 
 /* eslint-disable no-unused-vars, no-await-in-loop, no-console */
+const { Client, Collection, Guild, GuildMember, Interaction, Message, EmbedBuilder, Snowflake, ThreadMember, User } = require('discord.js');
+const { REST } = require('@discordjs/rest');
 const Database = require('@replit/database');
-const { 
-	Client,
-	Collection,
-	Guild,
-	GuildMember,
-	Interaction,
-	Message,
-	EmbedBuilder,
-	Snowflake,
-	ThreadMember,
-	User
-} = require('discord.js');
 const SkyblockHelperError = require('../errors/SkyblockHelperError');
+const fs = require('fs');
 const HTTPResponseError = require('../errors/HTTPResponseError');
 const Armor = require('../structures/Armor');
-const fetch = require('node-fetch');
+
 const extendNativeClasses = require('./extendNativeClasses');
+
+const { Routes } = require('discord-api-types/v9');
+const fetch = require('node-fetch');
+const path = require('path');
+
 
 extendNativeClasses({ extendArray: true, extendObject: false });
 
@@ -30,17 +28,17 @@ class Functions {
 		const d = new Date();
 		const utc = d.getTime() + d.getTimezoneOffset() * 60000;
 		const nd = new Date(utc + 3600000*offset);
-	
+
 		return nd.toLocaleString();
 	}
 
 	/**
-	 * Insert's commas in your number. A better way to read large numbers
+	 * Inserts commas in your number. A better way to read large numbers
 	 * @param {number} number
 	 */
 	static commafy(number) {
 		if (!number) return "0";
-	
+
 		const str = number.toString().split('.');
 		str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 		return str.join('.');
@@ -66,7 +64,7 @@ class Functions {
 				)
 			);
 		}
-	
+
 		return res.join('');
 	}
 
@@ -94,12 +92,12 @@ class Functions {
 
 	static secondsToHMS(seconds) {
 		const hours = parseInt( seconds / 3600 );
-		seconds = seconds % 3600; 
-	
+		seconds = seconds % 3600;
+
 		const minutes = parseInt( seconds / 60 );
 		seconds = seconds % 60;
-		
-		return (`${hours}:${minutes <= 9 ? `0${minutes}` : minutes}:${seconds <= 9 ? `0${seconds}` : seconds}`);	
+
+		return (`${hours}:${minutes <= 9 ? `0${minutes}` : minutes}:${seconds <= 9 ? `0${seconds}` : seconds}`);
 	}
 
 	/**
@@ -118,16 +116,45 @@ class Functions {
 
 	/**
 	 * Returns a roman numeral of a number
-	 * @param {number} num 
+	 * @param {number} num
 	 */
 	static toRomanNumeral(num) {
 		if (isNaN(num)) throw new SkyblockHelperError(`Expected variabe num to be of type integer but recieved type ${typeof num}`);
 
-		var digits = String(+num).split(""),
-			key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
-				"","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
-				"","I","II","III","IV","V","VI","VII","VIII","IX"],
-			roman = "",
+		const digits = String(+num).split("");
+		const key = [
+			"",
+			"C",
+			"CC",
+			"CCC",
+			"CD",
+			"D",
+			"DC",
+			"DCC",
+			"DCCC",
+			"CM",
+			"",
+			"X",
+			"XX",
+			"XXX",
+			"XL",
+			"L",
+			"LX",
+			"LXX",
+			"LXXX",
+			"XC",
+			"",
+			"I",
+			"II",
+			"III",
+			"IV",
+			"V",
+			"VI",
+			"VII",
+			"VIII",
+			"IX"
+		];
+		let roman = "",
 			i = 3;
 			// eslint-disable-next-line no-plusplus
 		while (i--) roman = (key[+digits.pop() + (i * 10)] || "") + roman;
@@ -136,24 +163,24 @@ class Functions {
 
 	/**
 	 * Checks if the last element in an array is a number in a string.
-	 * @param {string[]} args 
+	 * @param {string[]} args
 	 */
 	static arrayValidNumber(args) {
 		let number = args.slice().pop();
 
 		if (!number) return false;
-	
+
 		number = number.toLowerCase().replace('k', "000");
 		number = number.toLowerCase().replace('m', "000000");
 		number = number.toLowerCase().replace('b', "000000000");
-		
+
 		return isNaN(number) || number === "Infinity" ? false : true;
 	}
 
 	/**
 	 * @typedef SkybotTimeOptions
 	 * @property {boolean} [newLine=false]
-	 */ 
+	 */
 
 	/**
 	 * @param {number} SkybotTimeMs The number of milliseconds since the Day-Night Update epoch. ~~`October 25, 2021. 00:00:00`~~
@@ -172,7 +199,7 @@ class Functions {
 		const SkybotMinutes = Math.floor(seconds / 25) * 30;
 		seconds = seconds % 25;
 		// console.log(SkybotYears, SkybotMonths, SkybotDays, SkybotHours, SkybotMinutes, seconds);
-	
+
 		function OrdinalNumber(number) {
 			let return_value;
 			switch (number) {
@@ -182,7 +209,7 @@ class Functions {
 			case 2:
 				return_value = `2nd`;
 				break;
-			case 3: 
+			case 3:
 				return_value = `3rd`;
 				break;
 			default:
@@ -190,11 +217,11 @@ class Functions {
 			}
 			return return_value;
 		}
-	
+
 		/**
-		 * 
-		 * @param {number} SkybotMonths 
-		 * @returns {"Early Spring" | "Spring" | "Late Spring" | "Early Summer" | "Summer" | "Late Summer" | "Early Autumn" | "Autumn" | "Late Autumn" | "Early Winter" | "Winter" | "Late Winter"} 
+		 *
+		 * @param {number} SkybotMonths
+		 * @returns {"Early Spring" | "Spring" | "Late Spring" | "Early Summer" | "Summer" | "Late Summer" | "Early Autumn" | "Autumn" | "Late Autumn" | "Early Winter" | "Winter" | "Late Winter"}
 		 */
 		function SkyblockSeason(SkybotMonths) {
 			let return_value = "None";
@@ -235,12 +262,12 @@ class Functions {
 			case 12:
 				return_value = "Early Winter";
 				break;
-			default: 
+			default:
 				console.log(SkybotMonths);
 			}
 			return return_value;
 		}
-	
+
 		// eslint-disable-next-line no-nested-ternary
 		return `${SkybotHours <= 12 ? SkybotHours === 0 ? 12 : SkybotHours : SkybotHours - 12}:${SkybotMinutes < 9 ? SkybotMinutes + `0` : SkybotMinutes}${SkybotHours < 12 ? `am` : `pm`}${options.newLine ? `\n` : `, `}${OrdinalNumber(SkybotDays + 1)} of ${SkyblockSeason(SkybotMonths + 1)}, year ${SkybotYears}`;
 	}
@@ -248,38 +275,38 @@ class Functions {
 	/**
 	 * Syncs an old Repl.it Database, with a new Repl.it Database. Perfect for transferring important data from one repl to another.
 	 * @param {string} dbUrlToSyncTo The URL of the Repl.it Database that you want to add the values from the old database to. Basically, this is the database you are copying all the data to.
-	 * @param {string} dbUrlToSyncFrom The URL of the Repl.it Database that you want to extract the values from the old database to. Basically, this is the database you are copying all the data from. 
+	 * @param {string} dbUrlToSyncFrom The URL of the Repl.it Database that you want to extract the values from the old database to. Basically, this is the database you are copying all the data from.
 	 * @param {boolean} [logResults=false] If you would like to log results of adding keys to the database, simply enable this. Automatically sets to `false` when undefined.
 	 */
 	static async databaseResync(dbUrlToSyncTo, dbUrlToSyncFrom, logResults=false) {
 		if (!dbUrlToSyncTo || !dbUrlToSyncTo.startsWith('https://kv.replit.com/')) throw new TypeError('Expected variable dbUrlToSyncTo to be a string Repl.it Database URL.');
 
 		if (!dbUrlToSyncFrom || !dbUrlToSyncFrom.startsWith('https://kv.replit.com/')) throw new TypeError('Expected variable dbUrlToSyncFrom to be a string Repl.it Database URL.');
-		
-		
+
+
 		const oldDatabase = new Database(dbUrlToSyncFrom),
 			newDatabase = new Database(dbUrlToSyncTo),
 			keys = await oldDatabase.list();
-		
+
 		let successAdd = 0,
 			failureAdd = 0,
 			maxItemAdd = 0;
-		
+
 		for (const key of keys) {
 			maxItemAdd += 1;
 			try {
 				const value = await oldDatabase.get(key);
 				await newDatabase.set(key, value);
-		
+
 				if (logResults) console.log(`Successfully set ${key} to the new Database!`);
-		
+
 				successAdd += 1;
 			} catch (error) {
 				console.log(`An error occured while trying to sync key ${key}! ${error}`);
 				failureAdd += 1;
 			}
 		}
-		
+
 		if (logResults) console.log(`Successfully added ${successAdd} keys to the new Database, failed to add ${failureAdd} keys to the Database. Handled a total of ${maxItemAdd} keys.`);
 	}
 
@@ -297,7 +324,7 @@ class Functions {
 				saidNumbers.push(randomizer);
 				newArray.push(array[randomizer]);
 			}
-		} 
+		}
 		return newArray;
 	}
 
@@ -323,7 +350,7 @@ class Functions {
 			for (const userKey of userKeys) {
 				// eslint-disable-next-line no-await-in-loop
 				const value = await db.get(userKey);
-				
+
 				// We add the key to the objData.
 				objData[userKey.slice(18)] = value;
 				// Just in case something bad happens, we have a rollback ready.
@@ -341,7 +368,7 @@ class Functions {
 			try {
 				console.error(error);
 				console.error(`Initiating Database rollback on the keys of ${maid}. Returning deleted data...`);
-				
+
 				const rollbackTimestamp = Date.now();
 				// eslint-disable-next-line no-await-in-loop
 				for (const [key, value] of rollbackData) await db.set(key, value);
@@ -350,7 +377,7 @@ class Functions {
 			} catch (error) {
 				console.error(error);
 				console.error(`Couldn't complete Database rollback on the keys of ${maid}! Returning rollback data now!`);
-				
+
 				return rollbackData;
 			}
 		}
@@ -359,7 +386,7 @@ class Functions {
 	/**
 	 * Parses seconds to a days, hours, minutes, seconds format. Stripped from Dank Memer
 	 * @see https://github.com/DankMemer/CommunityBot/blob/main/src/utils/misc.js#L102_L125
-	 * @param {number} time 
+	 * @param {number} time
 	 * @returns {string}
 	 */
 	static parseTime(time) {
@@ -413,7 +440,7 @@ class Functions {
 
 	/**
 	 * Cleans a user id, ready to be used in searching for a user.
-	 * @param {string} userId 
+	 * @param {string} userId
 	 */
 	static cleanUserId(userId) {
 		userId = userId.toString();
@@ -423,7 +450,7 @@ class Functions {
 
 	/**
 	 * Resolves a GuildMember, User, MessageMention or a Snowflake into a User object. If the User doesn't exist, the message author will be used instead.
-	 * @param {UserResolvable} user 
+	 * @param {UserResolvable} user
 	 * @param {Client} message
 	 */
 	static resolveUser(user, client) {
@@ -434,7 +461,7 @@ class Functions {
 		if (user instanceof User) return user;
 		if (user instanceof GuildMember) return user.user;
 		if (user instanceof ThreadMember) return user.user;
-		
+
 		const userId = Functions.cleanUserId(user);
 
 		return client.users.cache.get(userId);
@@ -442,7 +469,7 @@ class Functions {
 
 	/**
 	 * Resolves a GuildMemberResolvable into a GuildMember object. If the GuildMember doesn't exist, undefined will be returned.
-	 * @param {GuildMemberResolvable} guildMember The GuildMemberResolvable you want to resolve into a GuildMember object. 
+	 * @param {GuildMemberResolvable} guildMember The GuildMemberResolvable you want to resolve into a GuildMember object.
 	 * @param {Guild} guild The guild to use in resolving the GuildMemberResolvable.
 	 */
 	static resolveGuildMember(guildMember, guild) {
@@ -460,8 +487,8 @@ class Functions {
 
 	/**
 	 * Gets a random number from `min` to `max`.
-	 * @param {number} min 
-	 * @param {number} max 
+	 * @param {number} min
+	 * @param {number} max
 	 */
 	static getRandomNumber(min, max) {
 		return Math.floor(Math.random() * (max - min + 1) + min);
@@ -477,8 +504,8 @@ class Functions {
 
 	/**
 	 * Checks if the user has a specific "Active Item". Added to `Functions` to prevent "Code Duplication"
-	 * @param {RawUserObj} maidObj 
-	 * @param {string} item 
+	 * @param {RawUserObj} maidObj
+	 * @param {string} item
 	 */
 	static checkActiveItem(maidObj, item) {
 		if (!('activeItems' in maidObj)) return false;
@@ -507,9 +534,9 @@ class Functions {
 
 	/**
 	 * Initiates the leaderboard.
-	 * @param {Database} db 
-	 * @param {Collection<string, SkybotCurrencyProfile>} leaderboard 
-	 * @param {Client} client 
+	 * @param {Database} db
+	 * @param {Collection<string, SkybotCurrencyProfile>} leaderboard
+	 * @param {Client} client
 	 */
 	static async initLeaderboard(db, leaderboard, client, excludedKeys=[]) {
 		const keys = (await db.list()).filter(key => !excludedKeys.includes(key));
@@ -521,11 +548,11 @@ class Functions {
 				netWorth = userObj?.netWorth ?? 0;
 
 			const user = await client.users.fetch(key);
-			const profile = { 
-				id: user.id, 
-				money: coins, 
-				netWorth: netWorth, 
-				username: user.username 
+			const profile = {
+				id: user.id,
+				money: coins,
+				netWorth: netWorth,
+				username: user.username
 			};
 
 			leaderboard.set(user.id, profile);
@@ -540,20 +567,20 @@ class Functions {
 	 */
 	static keepOldObjectProperty(objectOverwriteTo, objectOverwriteFrom, excludeOverwrite=[]) {
 		const data = objectOverwriteTo;
-	
+
 		for (const key in objectOverwriteFrom) {
 			if (key in objectOverwriteFrom && !excludeOverwrite.includes(key)) {
 				data[key] = objectOverwriteFrom[key];
 			}
 		}
-	
+
 		return data;
 	}
 
 	/**
-	 * Add a number to an object that you think is undefined. This safely adds the number to the object even if its null, and it wont return "NaN" unlike when you use the `+=` operator. 
+	 * Add a number to an object that you think is undefined. This safely adds the number to the object even if its null, and it wont return "NaN" unlike when you use the `+=` operator.
 	 * @param {any} object The object that you want to add numbers to.
-	 * @param {number} number 
+	 * @param {number} number
 	 */
 	static add(object, number) {
 		if (!object) {
@@ -564,14 +591,14 @@ class Functions {
 	}
 
 	/**
-	 * Sends a notification to a user. If the user has DM's off, this will send a message saying that they can't be DM'ed 
+	 * Sends a notification to a user. If the user has DM's off, this will send a message saying that they can't be DM'ed
 	 * @param {EmbedBuilder} embed
 	 * @param {User} user
 	 * @param {string | import('discord.js').MessageOptions | import('discord.js').MessagePayload}
 	 */
 	static async sendNotification(embed, user) {
 		const dmChannel = await user.createDM();
-		
+
 		dmChannel.send({ embeds: [embed] }).catch(() => {});
 	}
 
@@ -585,19 +612,19 @@ class Functions {
 	 */
 	static checkForFlag(array, flag, length=0, removeFromArray=false) {
 		const flagInArray = array.includes(flag);
-	
+
 		if (!flagInArray) return {
 			arguments: [],
 			exists: false,
 			flag: flag
 		};
-	
+
 		const indexOfFlag = array.indexOf(flag) + 1;
-	
+
 		if (removeFromArray) {
 			const items = array.splice(indexOfFlag - 1, (indexOfFlag - 1) + length);
 			const flag = items.shift();
-	
+
 			return {
 				arguments: items,
 				exists: true,
@@ -614,19 +641,19 @@ class Functions {
 
 	/**
 	 * Converts an Object's "property: value" structure into a Map.
-	 * @param {{}} obj 
-	 * @param {Map} mapToUse 
+	 * @param {{}} obj
+	 * @param {Map} mapToUse
 	 * @returns {void}
 	 */
 	static objToMap(obj) {
 		try {
 			const map = new Map();
-	
+
 			// eslint-disable-next-line guard-for-in
 			for (const key in obj) {
 				map.set(key, obj[key]);
 			}
-		
+
 			return map;
 		} catch (error) {
 			console.error(error);
@@ -635,19 +662,19 @@ class Functions {
 
 	/**
 	 * Converts an Map's "key: value" structure into an Object. Note that all keys will be turned into strings.
-	 * @param {Map | extends Map} map 
-	 * @param {{}} objToUse 
+	 * @param {Map | extends Map} map
+	 * @param {{}} objToUse
 	 * @returns {void}
 	 */
 	static mapToObj(map, objToUse={}) {
-		try {	
+		try {
 			if (!(map instanceof Map)) throw new Error('The "map" variable must be an uninstantiated Map or an uninstantiated class that extends Map!');
-	
+
 			// eslint-disable-next-line guard-for-in
 			for (const [key, value] of map.entries()) {
 				objToUse[key] = value;
 			}
-		
+
 			return objToUse;
 		} catch (error) {
 			console.error(error);
@@ -656,7 +683,7 @@ class Functions {
 
 	/**
 	 * This handy function returns a or an whether `word` starts with "a", "e", "i", "o", "u". This is very handy for those persons who don't want to have a big ternary expression just for 'a' and 'an'.
-	 * @param {string} word 
+	 * @param {string} word
 	 */
 	static aoran(word) {
 		if (word.startsWith('a') || word.startsWith('e') || word.startsWith('i') || word.startsWith('o') || word.startsWith('u')) {
@@ -667,83 +694,18 @@ class Functions {
 	}
 
 	/**
-	 * Gets a setting's value. Returns 'true' if the setting is set to true, and 'false' if it doesn't exist or is set to false. 
-	 * @param {RawUserObj} maidObj 
+	 * Gets a setting's value. Returns 'true' if the setting is set to true, and 'false' if it doesn't exist or is set to false.
+	 * @param {RawUserObj} maidObj
 	 * @param {string} setting
  	 */
 	static getSettingValue(maidObj, setting) {
 		const settingObj = maidObj?.settings?.find?.(_setting => _setting.setting === setting);
 
-		return !settingObj 
-			? false 
+		return !settingObj
+			? false
 			: settingObj?.value;
 	}
 
-	/**
-	 * Sets permissions for a guild slash command.
-	 * @param {Guild} guild 
-	 * @param {string} commandName 
-	 * @param {import('discord.js').ApplicationCommandPermissionData[]} permissions 
-	 * @deprecated Will be removed in SkyblockHelperv13; Discord doesn't allow bots to edit permissions anymore.
-	static async editGuildCommandPermissions(guild, commandName, permissions, editType='add') {
-		if (!(guild instanceof Guild)) throw new SkyblockHelperError(`Expected an instanceof Guild as value for variable "guild"!`, 'ALLOWED_VARIABLE_VALUES');
-	
-		const commands = await guild.commands.fetch();
-		const guildSlashCommand = commands.find(command => command.name === commandName);
-		const allowedValues = ['set', 'add'];
-	
-		if (!guildSlashCommand) throw new SkyblockHelperError('The guild slash command you tried to request does not exist!', 'GUILD_COMMAND_EXISTS');
-	
-		if (!allowedValues.includes(editType)) throw new SkyblockHelperError(`Expected "add" or "set" as value for variable "editType". Recieved ${editType}!`, 'ALLOWED_VARIABLE_VALUES');
-	
-		if (editType === 'add') {
-			await guild.commands.permissions.add(
-				{
-					command: guildSlashCommand.id,
-					permissions
-				}
-			);
-		} else {
-			await guild.commands.permissions.set(
-				{
-					command: guildSlashCommand.id,
-					permissions
-				}
-			);
-		}
-	}
-	*/
-	
-	/**
-	 * Sets permissions for a global slash command.
-	 * @param {Client} client 
-	 * @param {string} commandName 
-	 * @param {import('discord.js').ApplicationCommandPermissionData[]} permissions 
-	 * @deprecated Will be removed in SkyblockHelperv13; Discord doesn't allow bots to edit permissions anymore.
-	static async editClientCommandPermissions(client, commandName, permissions, editType='add') {
-		// if (!(client instanceof Client)) throw new SkyblockHelperError(`Expected an instanceof Client as value for variable "client"!`, 'ALLOWED_VARIABLE_VALUES');
-	
-		const OAuth2Guilds = await client.guilds.fetch();
-
-		for (const OAuth2Guild of OAuth2Guilds.values()) {
-			const guild = await OAuth2Guild.fetch();
-			const commands = await client.application?.commands.fetch();
-			const globalSlashCommand = await client.application?.commands.fetch(commands.find(command => command.name === commandName).id);
-			const allowedValues = ['set', 'add'];
-				
-			if (!globalSlashCommand) throw new SkyblockHelperError('The global slash command you tried to request does not exist!', 'GLOBAL_COMMAND_EXISTS');
-		
-			if (!allowedValues.includes(editType)) throw new SkyblockHelperError(`Expected "add" or "set" as value for variable "editType". Recieved ${editType}!`, 'ALLOWED_VARIABLE_VALUES');
-		
-			if (editType === 'add') {
-				await globalSlashCommand.permissions.add({ guild: guild.id, permissions });
-			} else {
-				await globalSlashCommand.permissions.set({ guild: guild.id, permissions });
-			}
-		}
-	}
-	*/
-	
 	/**
 	 * Fetches an application command from the parentResolvable. If `parentResolvable` is a guild, the command will be fetched from the Guild, otherwise if `parentResolvable` is a client, the command will be fetched from the Client.
 	 * @param {Guild | Client} parentResolvable The parent to use in fetching the slash command
@@ -751,19 +713,19 @@ class Functions {
 	 */
 	static async fetchApplicationCommand(parent, commandName) {
 		if (!(parent instanceof Client) && !(parent instanceof Guild)) throw new SkyblockHelperError(`Expected an instanceof Client or Guild as value for variable "parent"!`, 'ALLOWED_VARIABLE_VALUES');
-	
+
 		const commandManager = parent instanceof Client
 			? parent.application.commands
 			: parent.commands;
-	
+
 		const commandCache = await commandManager.fetch();
-	
+
 		return commandCache.find(command => command.name === commandName);
 	}
 
 	static createProgressBar(
-		percentage, 
-		maxTiles = 5, 
+		percentage,
+		maxTiles = 5,
 		options = {
 			bar1: {
 				full: `<:Bar1_Full:973874228225015809>`,
@@ -826,7 +788,7 @@ class Functions {
 
 		for (const user of users) {
 			const userObj = await db.get(user);
-			
+
 			collection.set(user, userObj);
 		}
 
@@ -838,7 +800,7 @@ class Functions {
 	 */
 	static resolveArmorStats(armor) {
 		const stats = armor?.armor?.stats;
-		
+
 		return {
 			health: stats?.health ?? 0,
 			defense: stats?.defense ?? 0,
@@ -916,48 +878,12 @@ class Functions {
 		data,
 		error = Error,
 		errorMessage = `Expected a string, got ${data} instead.`,
-		allowEmpty = true,
+		allowEmpty = true
 	) {
 		if (typeof data !== 'string') throw new error(errorMessage);
 		if (!allowEmpty && data.length === 0) throw new error(errorMessage);
 		return data;
 	}
-
-	/**
-	 * Reloads an exported SkyblockHelper item with a command.
-	 * @param {*} item 
-	 * @param {*} commandName 
-	 * @deprecated Will be removed in SkyblockHelperv13
-	static reloadHelperItemWithCommand(client, item, commandName) {
-		const fs = require('node:fs');
-		const path = require('node:path');
-		const fileArr = [];
-		const pathArr = [];
-
-		const expPath = path.join(__dirname, '../../../SkyblockHelper/src');
-		const folders = fs.readdirSync(expPath).filter(folder => !folder.includes('.'));
-
-		for (const folder of folders) {
-			const folderPath = path.join(expPath, folder);
-			const files = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
-
-			for (const file of files) {
-				fileArr.push(file);
-				pathArr.push(path.join(folderPath, file));
-			}
-		}
-
-		if (!fileArr.includes(item)) throw new SkyblockHelperError(`The exported SkyblockHelper item you wanted to reload does not exist!`, `EXPORTED_ITEM_VALUES`);
-
-
-
-		const filePath = pathArr.find(path => path.includes(item));
-
-		delete require.cache[require.resolve(filePath)];
-
-		delete require.cache[require.resolve(`../../../SkyblockHelper/src/index.js`)];	
-	}
-	*/
 
 	static async request(url, requestData, retryMaximum, totalRetries=0) {
 		console.log(`Sending a request to ${url}. Retry Count: ${totalRetries}, Maximum Retries: ${retryMaximum}`);
@@ -1005,6 +931,73 @@ class Functions {
 		const value = await response.json();
 
 		return value.value;
+	}
+
+	/**
+	 * Gets the path of a command file. This supports getting files where the name of the command isn't the same as the file name. (Filename: `test.js`; Command: `/dev`);
+	 * @param {Client} client The instance of `Client` to reload the command from.
+	 * @param {string} commandName The command name you want to reload.
+	 * @param {string} commandFolderPath The path for the command folders your bot is using. This has to be the FULL directory path, therefore `path.join()` and `__dirname` are required.
+	 * @returns {string}
+	 */
+	static getCommandFilePath(client, commandName, commandFolderPath) {
+		const command = client.slashCommands.get(commandName);
+
+		if (!command) throw new SkyblockHelperError(`Variable "command" must be a valid slash command!`, `COMMAND_RANGE_VALUE`);
+
+		const commandFolders = fs.readdirSync(commandFolderPath).filter(file => file.includes('.'));
+		const folderName = commandFolders.find(folder => fs.readdirSync(path.join(commandFolderPath, folder).includes(`${command.data.name}.js`)));
+
+		if (folderName) return path.join(commandFolderPath, folderName, `${command.data.name}.js`);
+
+		// This means that the command DOES exist but the name of the file is not the same as the command name (test.js -> /tcg), so we have to find it by checking all the files.
+
+		for (const folder of commandFolders) {
+			const commandFiles = fs.readdirSync(path.join(commandFolderPath, folder)).filter(file => file.endsWith('.js'));
+
+			for (const file of commandFiles) {
+				const commandData = require(path.join(commandFolderPath, folder, file));
+
+				if (commandData.name === command.data.name) return path.join(commandFolderPath, folder, file);
+			}
+		}
+	}
+
+	/**
+	 * Reloads a slash command
+	 * @param {string} commandName The command name you want to reload.
+	 * @param {string} commandFolderPath The path for the command folders your bot is using. This has to be the FULL directory path, therefore `path.join()` and `__dirname` are required.
+	 * @param {Client} client The instance of `Client` to reload the command from.
+	 * @param {string} token The token for your bot.
+	 * @param {boolean} [apiRequest=true] Whether or not the command should request to the API. If you want to reload the code for the command, this should be set to `false` for convienence, but if the command parameters are included, set this to `true`. Automatically sets to true.
+	 * @param {string} [guildId=''] The id of the `Guild` you want to reload the command in. If left blank, this will treat the command as a **Client** `ApplicationCommand`, otherwise, it will treat the command as a **Guild** `ApplicationCommand`
+	 * @returns {Promise<void>}
+	 */
+	static async reloadCommand(commandName, commandFolderPath, client, token, apiRequest=true, guildId=null) {
+		const guild = client.guilds.cache.get(guildId);
+		const command = client.slashCommands.get(commandName);
+
+		const commandPath = Functions.getCommandFilePath(client, commandName, commandFolderPath);
+
+		delete require.cache[require.resolve(commandPath)];
+
+		const rest = new REST({ version: '10' }).setToken(token);
+		const applicationCommand = await Functions.fetchApplicationCommand(guild ?? client, command.data.name)
+
+		const newCommand = require(commandPath);
+
+		client.slashCommands.set(newCommand.data.name, newCommand);
+
+		if (!apiRequest) return;
+
+		const Route = !guild
+			? Routes.applicationCommand(client.user.id, applicationCommand.id)
+			: Routes.applicationGuildCommand(client.user.id, guild.id, applicationCommand.id);
+
+		await rest.patch(
+			Route,
+			{ body: newCommand.data.toJSON() }
+		);
 	}
 }
 

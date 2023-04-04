@@ -124,7 +124,7 @@ module.exports = {
 			)
 			.addSubcommand(subcommand => subcommand
 				.setName(`--find`)
-				.setDescription(`Finds an emoji using the given query`)	
+				.setDescription(`Finds an emoji using the given query`)
 				.addStringOption(option => option
 					.setName(`emoji`)
 					.setDescription(`A query which can be used to find an emoji.`)
@@ -156,7 +156,7 @@ module.exports = {
 					.setName(`key`)
 					.setDescription(`The key to get`)
 					.setRequired(true)
-				)	
+				)
 			)
 			.addSubcommand(subcommand => subcommand
 				.setName(`set`)
@@ -208,7 +208,7 @@ module.exports = {
 			)
 			.addSubcommand(subcommand => subcommand
 				.setName(`url`)
-				.setDescription(`Gets the Database URL`)	
+				.setDescription(`Gets the Database URL`)
 			)
 		)
 		.addSubcommandGroup(subcommand => subcommand
@@ -225,7 +225,7 @@ module.exports = {
 			)
 			.addSubcommand(subcommand => subcommand
 				.setName(`guild`)
-				.setDescription(`Loads a guild slash command`)	
+				.setDescription(`Loads a guild slash command`)
 				.addStringOption(option => option
 					.setName(`command`)
 					.setDescription(`The slash command to load.`)
@@ -257,7 +257,7 @@ module.exports = {
 			)
 			.addSubcommand(subcommand => subcommand
 				.setName(`guild`)
-				.setDescription(`Reloads a guild slash command`)	
+				.setDescription(`Reloads a guild slash command`)
 				.addStringOption(option => option
 					.setName(`command`)
 					.setDescription(`The slash command to reload.`)
@@ -286,7 +286,7 @@ module.exports = {
 	group: `Developer`,
 	developerOnly: true,
 	/**
-	 * @param {ChatInputCommandInteraction} interaction 
+	 * @param {ChatInputCommandInteraction} interaction
 	 * @param {any} db
 	 * @param {string} maid
 	 */
@@ -301,10 +301,10 @@ module.exports = {
 			const id = interaction.options.getString('user', true);
 			const duration = interaction.options.getInteger('custom-duration', false) ?? interaction.options.getInteger('duration', true);
 			const reason = interaction.options.getString('reason', true);
-	
+
 			const user = interaction.client.users.cache.get(id) ?? null;
 			const userObj = await db.get(id);
-	
+
 			userObj.banned = {
 				timestamp: Date.now() + duration,
 				reason: reason,
@@ -313,42 +313,42 @@ module.exports = {
 					mention: interaction.user.toString()
 				}
 			};
-	
+
 			await db.set(id, userObj);
 
 			await interaction.reply({ content: `Successfully banned \`${user?.username ?? id}\`!`, ephemeral: true });
 		} else if (command === 'botwipe') {
 			const userId = interaction.options.getString(`user`, true);
 			const reason = interaction.options.getString(`reason`, true);
-	
+
 			const userToWipe = interaction.client.users.cache.get(userId);
-	
+
 			const userToWipeObj = await db.get(userToWipe.id);
 
 			if (!userToWipeObj?.start) return interaction.reply({ content: `${userToWipe} has no Skybot profile!`, ephemeral: true });
-	
+
 			let totalSellableValue = 0;
-	
+
 			const itemMap = interaction.client.assetMap.filter(asset => `sellall` in asset && asset.sellall.included);
-	
+
 			for (const item of itemMap.values()) {
 				try {
 					// eslint-disable-next-line no-await-in-loop
 					const userItems = userToWipeObj[item.keyName] ?? 0;
 					const totalItemValue = (userItems * item.NPC.sell.price) ?? 0;
-					
+
 					totalSellableValue += totalItemValue;
 				} catch (error) {
 					console.error(error);
 				}
 			}
-	
+
 			const confirmationEmbed = new EmbedBuilder()
 				.setColor(`Yellow`)
 				.setTitle(`Pending Action`)
 				.setDescription(`**${userToWipe.username}#${userToWipe.discriminator}** (${userToWipe}) has:\nCoins: <:Coins:885677584749318154> ${Functions.commafy(userToWipeObj.coins)}\nBank: <:Coins:885677584749318154> ${Functions.commafy(userToWipeObj.bank)}\nInventory: <:Coins:885677584749318154> ${Functions.commafy(totalSellableValue)}\n\nTotal: <:Coins:885677584749318154> ${Functions.commafy(userToWipeObj.coins + userToWipeObj.bank + totalSellableValue)}\n\nWipe?`)
 				.setFooter({ text: `Inspired by Dank Memer.` });
-	
+
 			const confirmRow = new ActionRowBuilder()
 				.addComponents(
 					new ButtonBuilder()
@@ -360,7 +360,7 @@ module.exports = {
 						.setLabel(`Confirm`)
 						.setStyle(ButtonStyle.Success)
 				);
-	
+
 			const cancelWipeRow = new ActionRowBuilder()
 				.addComponents(
 					new ButtonBuilder()
@@ -374,7 +374,7 @@ module.exports = {
 						.setStyle(ButtonStyle.Secondary)
 						.setDisabled(true)
 				);
-			
+
 			const confirmWipeRow = new ActionRowBuilder()
 				.addComponents(
 					new ButtonBuilder()
@@ -388,33 +388,33 @@ module.exports = {
 						.setStyle(ButtonStyle.Success)
 						.setDisabled(true)
 				);
-	
+
 			/** @type {(import 'discord.js').Message<true>} */
 			const sent = await interaction.reply({ embeds: [confirmationEmbed], components: [confirmRow], fetchReply: true });
-			
+
 			const collector = sent.createMessageComponentCollector(
-				{ 
-					filter: i => i.user.id === interaction.user.id, 
-					componentType: ComponentType.Button 
+				{
+					filter: i => i.user.id === interaction.user.id,
+					componentType: ComponentType.Button
 				}
 			);
-	
+
 			collector.on(`collect`, async button => {
 				if (button.customId === `cancelWipe`) {
 					confirmationEmbed
 						.setColor(`Red`)
 						.setTitle('Action Cancelled');
 					await button.update({ embeds: [confirmationEmbed], components: [cancelWipeRow] });
-	
+
 					await button.followUp({ content: `cancelled the wipe, boss`, ephemeral: true });
 				} else if (button.customId === `confirmWipe`) {
 					confirmationEmbed
 						.setColor(`Green`)
 						.setTitle('Action Confirmed');
 					await button.update({ embeds: [confirmationEmbed], components: [confirmWipeRow] });
-	
+
 					const itemMap = interaction.client.assetMap;
-	
+
 					for (const item of itemMap.values()) {
 						try {
 							userToWipeObj[item.keyName] = 0;
@@ -422,28 +422,28 @@ module.exports = {
 							console.error(error);
 						}
 					}
-	
+
 					// Other properties that need to be wiped. The system above can only wipe "sellable" items
 					userToWipeObj.coins = 0;
 					userToWipeObj.bank = 0;
 					userToWipeObj.netWorth = 0;
-	
+
 					userToWipeObj.mineXp = 0;
 					userToWipeObj.mineLevel = 0;
 					userToWipeObj.fishXp = 0;
 					userToWipeObj.fishLevel = 0;
 					userToWipeObj.chopXp = 0;
 					userToWipeObj.chopLevel = 0;
-	
+
 					userToWipeObj.pickaxe = '<:Wooden_Pickaxe:817217441394196572>';
 					userToWipeObj.axe = '<:Wooden_Axe:817217337261424650>';
 					userToWipeObj.rod = '<:Wooden_Rod:816598231509237810>';
-	
+
 					userToWipeObj.mine = SkyblockTypes.SkyblockMines.StarterMine;
 					userToWipeObj.forest = SkyblockTypes.SkyblockForests.Forest;
-	
+
 					userToWipeObj.bankTier = 1;
-					
+
 					userToWipeObj.placedMinions = [
 						[
 							'cobblestone minion',
@@ -463,15 +463,15 @@ module.exports = {
 							'cobblestone minion'
 						]
 					];
-	
+
 					// This is a message that will pop up when the user issues a Skybot command, instead of DMing them
 					userToWipeObj.wiped = {
 						reason: reason,
 						performer: interaction.user
 					};
-	
+
 					await button.followUp({ content: `wiped, boss`, ephemeral: true });
-	
+
 					await db.set(userToWipe.id, userToWipeObj);
 				}
 			});
@@ -479,7 +479,7 @@ module.exports = {
 			const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
 			const result = [];
 			const charactersLength = characters.length;
-							
+
 			for (let i = 0; i < 7; i++) {
 				result.push(
 					characters.charAt(
@@ -491,7 +491,7 @@ module.exports = {
 			await interaction.reply({ content: `Build Generated: ${result.join('')}`, ephemeral: true });
 		} else if (command === 'give') {
 			const { assetMap } = interaction.client;
-	
+
 			const user = interaction.options.getUser(`user`, true);
 			const item = interaction.options.getString(`item`, true);
 			const amount = interaction.options.getInteger(`amount`, false) ?? 1;
@@ -504,25 +504,25 @@ module.exports = {
 			if (!asset) return interaction.reply({ content: `what are you doing that item doesnt exist`, ephemeral: true });
 
 			const confirmation = new Confirmation(interaction, { content: `📦 ${interaction.user}, are you sure to give ${user} **${Functions.commafy(amount)}x** ${asset.displayEmojiName('inventory')} \`${asset.name}\`?` });
-	
+
 			confirmation.on('check', async (button, sent) => {
 				const userObj = await db.get(user.id);
-				
+
 				if (typeof userObj[asset.keyName] !== "number") {
 					userObj[asset.keyName] = amount;
 				} else {
 					userObj[asset.keyName] += amount;
 				}
-	
+
 				await db.set(user.id, userObj);
-	
+
 				sent.edit(`<:check:885408207097462786> You gave ${user} **${Functions.commafy(amount)}x** ${asset.emoji.name} \`${asset.name}\`!`);
 			});
-	
+
 			confirmation.on('cross', async (button, sent) => {
 				await sent.edit(`<:cross:885408206959046678> Give cancelled!`);
 			});
-	
+
 			confirmation.on('error', async (error, sent) => {
 				await sent.edit(`<:cross:885408206959046678> Give cancelled!`);
 			});
@@ -550,7 +550,7 @@ module.exports = {
 								.setStyle(TextInputStyle.Paragraph)
 						)
 				);
-			
+
 			await interaction.showModal(modal);
 
 			try {
@@ -564,10 +564,10 @@ module.exports = {
 				);
 
 				console.log(
-					collected.deferred, 
-					collected.replied, 
+					collected.deferred,
+					collected.replied,
 					collected.replied ? collected.fetchReply() : null
-				)
+				);
 
 				const i = await collected.deferReply({ ephemeral: true });
 
@@ -575,23 +575,23 @@ module.exports = {
 
 				const evalEmbed = new EmbedBuilder()
 					.addFields(
-						{ name: `Input`, value: `\`\`\`js\n${code}\`\`\`` },
+						{ name: `Input`, value: `\`\`\`js\n${code}\`\`\`` }
 					);
-	
+
 				try {
 					// eslint-disable-next-line no-eval
 					const output = await eval(code);
-	
+
 					evalEmbed.addFields(
 						{ name: `Output`, value: `\`\`\`js\n${output}\`\`\``}
 					);
-	
+
 					await i.interaction.editReply({ embeds: [evalEmbed] });
 				} catch (error) {
 					evalEmbed.addFields(
 						{ name: `Output`, value: `\`\`\`\n${error.stack}\`\`\``}
 					);
-	
+
 					await i.interaction.editReply({ embeds: [evalEmbed] });
 				}
 			} catch (error) {
@@ -685,13 +685,13 @@ module.exports = {
 							<:Netherite_Ingot:834601141861613638> \\<:Netherite_Ingot:834601141861613638>
 							<:Netherite_Pickaxe:834598829902135331> \\<:Netherite_Pickaxe:834598829902135331>
 							<:Netherite_Axe:834598829855997993> \\<:Netherite_Axe:834598829855997993>`);
-				
+
 				await interaction.reply({ embeds: [emojiUnicodeEmbed1, emojiUnicodeEmbed2, emojiUnicodeEmbed3, emojiUnicodeEmbed4, emojiUnicodeEmbed5, emojiUnicodeEmbed6], ephemeral: true });
 			} else if (flag === '--list') {
 				const emojiData = interaction.client.guilds.cache
 					.filter(guild => qualifiedEmojiGuilds.includes(guild.id))
 					.map(emojiGuild => emojiGuild.emojis.cache
-						.map(emoji => `${emoji.name}\nEmoji: <:${emoji.name}:${emoji.id}>\nUnicode: \\<:${emoji.name}:${emoji.id}>\nURL: <${emoji.url}>`)	
+						.map(emoji => `${emoji.name}\nEmoji: <:${emoji.name}:${emoji.id}>\nUnicode: \\<:${emoji.name}:${emoji.id}>\nURL: <${emoji.url}>`)
 					)
 					.flat(1);
 
@@ -700,7 +700,7 @@ module.exports = {
 						.setTitle(`Emoji Unicode ${index + 1}/${array.length}`)
 						.setDescription(emojiData.join('\n\n'))
 					);
-				
+
 				const slicedEmbeds = Functions.sliceIntoChunks(emojiEmbedArray, 2);
 
 				let index = 1;
@@ -717,7 +717,7 @@ module.exports = {
 				const query = interaction.options.getString('emoji', true);
 				/** @type { Collection<string, (import 'discord.js').GuildEmoji> } */
 				const emojiMap = new Collection();
-				
+
 				interaction.client.guilds.cache
 					.filter(guild => qualifiedEmojiGuilds.includes(guild.id))
 					.map(guild => guild.emojis.cache)
@@ -741,7 +741,7 @@ module.exports = {
 				const name = interaction.options.getString('name', true);
 				/** @type { Collection<string, (import 'discord.js').GuildEmoji> } */
 				const emojiMap = new Collection();
-				
+
 				interaction.client.guilds.cache
 					.filter(guild => qualifiedEmojiGuilds.includes(guild.id))
 					.map(guild => guild.emojis.cache)
@@ -765,7 +765,7 @@ module.exports = {
 						} else {
 							const res = word.split('');
 
-							return res.map((char, index) => (index < 1 ? char.toUpperCase() : char)).join('');							
+							return res.map((char, index) => (index < 1 ? char.toUpperCase() : char)).join('');
 						}
 					})
 					.join('');
@@ -801,7 +801,7 @@ module.exports = {
 
 				try {
 					interaction.client.slashCommands.set(slashCommand.data.name, slashCommand);
-						
+
 					await rest.post(
 						Route,
 						{ body: slashCommand.data.toJSON() }
@@ -810,13 +810,13 @@ module.exports = {
 					await interaction.reply({ content: `Command \`${slashCommand.data.name}\` was loaded!`, ephemeral: true });
 				} catch (error) {
 					console.error(error);
-							
+
 					await interaction.reply({ content: `There was an error while loading command \`${slashCommand.data.name}\``, ephemeral: true });
 				}
 
 				isRealCommand = true;
 			}
-			
+
 			if (!isRealCommand) return interaction.reply({ content: `There is no command file with the name \`${command}.js\`, ${interaction.user}!`, ephemeral: true });
 		} else if (commandGroup === 'reload') {
 			const command = interaction.options.getSubcommand(false);
@@ -847,12 +847,12 @@ module.exports = {
 							{ body: newCommand.data.toJSON() }
 						);
 					}
-	
-					await interaction.reply({ content: `Command \`${newCommand.data.name}\` was reloaded!`, ephemeral: true });
+
+					await interaction.reply({ content: `Command \`/${newCommand.data.name}\` was reloaded!`, ephemeral: true });
 				} catch (error) {
 					console.error(error);
-	
-					await interaction.reply({ content: `I ran into an error while trying to reload \`${commandFile.data.name}\``, ephemeral: true });
+
+					await interaction.reply({ content: `I ran into an error while trying to reload \`/${commandFile.data.name}\``, ephemeral: true });
 				}
 			} else if (command === 'guild') {
 				const commandName = interaction.options.getString('command', true);
@@ -884,59 +884,59 @@ module.exports = {
 					await interaction.reply({ content: `Command \`${newCommand.data.name}\` was reloaded!`, ephemeral: true });
 				} catch (error) {
 					console.error(error);
-	
+
 					await interaction.reply({ content: `I ran into an error while trying to reload \`${commandFile.data.name}\``, ephemeral: true });
 				}
 			} else if (command === 'assets') {
 				const forceFlag = interaction.options.getBoolean('--force', false) ?? false;
-			
+
 				if (forceFlag) interaction.client.assetMap.clear();
-	
+
 				await interaction.reply({ content: `🔄 Reloading all assets now.`, ephemeral: true });
-	
+
 				const assetFolders = fs.readdirSync(`./assets`),
 					assetStartMs = Date.now();
 				let assetsLoadedSuccess = 0,
 					assetsLoadedFailure = 0;
-		
+
 				for (const folder of assetFolders) {
 					const assetFiles = fs.readdirSync(`./assets/${folder}`).filter(file => file.endsWith('.js'));
 					for (const file of assetFiles) {
 						delete require.cache[require.resolve(`../../assets/${folder}/${file}`)];
-	
+
 						const asset = require(`../../assets/${folder}/${file}`);
-						
+
 						try {
 							if ('includeInParsing' in asset) {
 								if (asset.includeInParsing) {
 									interaction.client.assetMap.set(asset.keyName, asset);
-									
+
 									assetsLoadedSuccess += 1;
 								} else {
 									interaction.client.console.push(`${Functions.getUTCTime()} [Asset][Warning] | ${'name' in asset ? `"${asset.name}"` : `""`} | ./assets/${folder}/${file} | Your asset had the property "includeInParsing" set to false. This means that your asset will not be included in the assetMap. If this was not intentional, please set the "includeInParsing" property to true and restart the code or reuse the \`reload-items\` command.`);
 									console.warn(`${Functions.getUTCTime()} [Asset]${chalk.yellowBright(`[Warning]`)} | ${'name' in asset ? `"${asset.name}"` : `""`} | ./assets/${folder}/${file} | Your asset had the property "includeInParsing" set to false. This means that your asset will not be included in the assetMap. If this was not intentional, please set the "includeInParsing" property to true and restart the code or reuse the \`reload-items\` command.`);
-									
+
 									assetsLoadedFailure += 1;
 								}
 							} else {
 								interaction.client.console.push(`${Functions.getUTCTime()} [Asset][Warning] | ${'name' in asset ? `"${asset.name}"` : `""`} | ./assets/${folder}/${file} | Your asset didn't have the property "includeInParsing". It will be regarded as false and will not be included in the assetMap. If this was not intentional, please include the "includeInParsing" property and set it to true, then restart the code or reuse the \`reload-items\` command.`);
 								console.warn(`${Functions.getUTCTime()} [Asset]${chalk.redBright(`[Warning]`)} | ${'name' in asset ? `"${asset.name}"` : `""`} | ./assets/${folder}/${file} | Your asset didn't have the property "includeInParsing". It will be regarded as false and will not be included in the assetMap. If this was not intentional, please include the "includeInParsing" property and set it to true, then restart the code or reuse the \`reload-items\` command.`);
-								
+
 								assetsLoadedFailure += 1;
 							}
 						} catch (error) {
 							interaction.client.console.push(`${Functions.getUTCTime()} [Asset][Error] | ${'name' in asset ? `"${asset.name}"` : `""`} | ./assets/${folder}/${file} | ${error}`);
 							console.error(`${Functions.getUTCTime()} [Asset]${chalk.redBright(`[Warning]`)} | ${'name' in asset ? `"${asset.name}"` : `""`} | ./assets/${folder}/${file} | ${error}`);
-							
+
 							assetsLoadedFailure += 1;
 						}
 					}
 				}
-				
+
 				interaction.client.console.push(`${Functions.getUTCTime()} [Asset][Logging] | Successfully reloaded ${assetsLoadedSuccess} assets; failed to reload ${assetsLoadedFailure} assets. Total of ${assetsLoadedFailure + assetsLoadedSuccess} assets handled in ${Functions.msToHMSMs(Date.now() - assetStartMs)}`);
 				// eslint-disable-next-line no-console
 				console.log(`${Functions.getUTCTime()} [Asset]${chalk.greenBright(`[Logging]`)} | Successfully reloaded ${assetsLoadedSuccess} assets; failed to reload ${assetsLoadedFailure} assets. Total of ${assetsLoadedFailure + assetsLoadedSuccess} assets handled in ${Functions.msToHMSMs(Date.now() - assetStartMs)}`);
-				
+
 				await interaction.editReply(`<:check:885408207097462786> Successfully reloaded all items!`);
 			}
 		} else if (commandGroup === 'key') {
@@ -947,12 +947,12 @@ module.exports = {
 
 				const obj = await db.get(key);
 				const data = JSON.stringify(obj, null, `\t`);
-	
+
 				await interaction.deferReply({ ephemeral: true });
 
 				fs.writeFile(`${key}_Object.json`, data, async () => {
 					await interaction.editReply({ content: `Key info for ${key}\nDatatype: ${typeof (obj)}\nValue: `, files: [`./${key}_Object.json`] });
-					
+
 					fs.unlink(`${key}_Object.json`, () => {});
 				});
 			} else if (command === `set`) {
@@ -967,11 +967,11 @@ module.exports = {
 					obj[property] = value;
 				} else if (type === 'number') {
 					if (isNaN(value)) return interaction.reply({ content: `${value} cannot be parsed into a number!`, ephemeral: true });
-					
+
 					obj[property] = parseFloat(value);
 				} else if (type === 'integer') {
 					if (isNaN(value)) return interaction.reply({ content: `${value} cannot be parsed into an integer!`, ephemeral: true });
-					
+
 					obj[property] = parseInt(value);
 				} else {
 					if (value === 'true') obj[property] = true;
@@ -979,8 +979,8 @@ module.exports = {
 					else return interaction.reply({ content: `${value} cannot be parsed into a boolean!`, ephemeral: true });
 				}
 
-				await interaction.reply({ content: `<:check:885408207097462786> Successfully set the \`${property}\` property in \`${key}\` to **${value}: ${type ?? `string`}**`, ephemeral: true }); 
-				
+				await interaction.reply({ content: `<:check:885408207097462786> Successfully set the \`${property}\` property in \`${key}\` to **${value}: ${type ?? `string`}**`, ephemeral: true });
+
 				await db.set(key, obj);
 			} else if (command === `delete`) {
 				const key = interaction.options.getString('key', true);
@@ -991,12 +991,12 @@ module.exports = {
 				Reflect.deleteProperty(obj, property);
 
 				await interaction.reply({ content: `<:check:885408207097462786> Successfully deleted the \`${property}\` property in \`${key}\`!`, ephemeral: true });
-				
+
 				await db.set(obj);
 			} else if (command === `list`) {
 				const keys = await db.list();
 				const msgs = Functions.splitMessage(keys.join('\n'), { maxLength: 2000 });
-				
+
 				let index = 1;
 				for (const content of msgs) {
 					if (index === 1) {

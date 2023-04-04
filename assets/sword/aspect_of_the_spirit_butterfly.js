@@ -4,7 +4,6 @@ const { Sword, Functions: { commafy, keepOldObjectProperty }} = require('../../S
 
 module.exports = new Sword(
 	{
-		search: [`aery sword`, `aery`],
 		group: `Sword`,
 		name: `Aspect of the Spirit Butterfly`,
 		keyName: `aspectOfTheSpiritButterfly`,
@@ -12,7 +11,7 @@ module.exports = new Sword(
 		rarity: `Mythic`,
 		emoji: {
 			name: `<:Aspect_Of_The_Spirit_Butterfly:945957788155273226>`,
-			url: `https://cdn.discordapp.com/emojis/945957788155273226.png`,
+			url: `https://cdn.discordapp.com/emojis/945957788155273226.png`
 		},
 		NPC: {
 			sell: {
@@ -25,7 +24,7 @@ module.exports = new Sword(
 			}
 		},
 		sellall: {
-			included: false,
+			included: false
 		},
 		crafting: {
 			type: `oneItem`,
@@ -41,7 +40,7 @@ module.exports = new Sword(
 		},
 		onEquip(interaction, maidObj) {
 			const swordObj = {
-				name: `Aspect of the Spirit Butterfly`, 
+				name: `Aspect of the Spirit Butterfly`,
 				keyName: `aspectOfTheSpiritButterfly`,
 				emoji: `<:Aspect_Of_The_Spirit_Butterfly:945957788155273226>`,
 				baseDamage: 250,
@@ -59,12 +58,12 @@ module.exports = new Sword(
 				if (sword.spiritButterflies < 30_000) {
 					// 600 kills to move to the next phase.
 					sword.spiritButterflies += 50;
-				
+
 					interaction.channel.send(`Your <:Aspect_Of_The_Spirit_Butterfly:945957788155273226> **Aspect of the Spirit Butterfly** gained **50x** <:Spirit_Butterfly:942633700485632071> **Spirit Butterfly** after that kill! (${commafy(sword.spiritButterflies)} / 49,875)`);
 				} else if (sword.spiritButterflies < 42_500) {
 					// 625 kills to move to the next phase.
 					sword.spiritButterflies += 20;
-				
+
 					interaction.channel.send(`Your <:Aspect_Of_The_Spirit_Butterfly:945957788155273226> **Aspect of the Spirit Butterfly** gained **20x** <:Spirit_Butterfly:942633700485632071> **Spirit Butterfly** after that kill! (${commafy(sword.spiritButterflies)} / 49,875)`);
 				} else if (sword.spiritButterflies < 49_000) {
 					// 650 kills to move to the next phase.

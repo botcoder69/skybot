@@ -6,8 +6,8 @@ const timeCodeStarted = Date.now();
 const CodeHandler = require('./Handlers');
 const fs = require('fs');
 const Util = require('./Util');
-const { ActionRowBuilder, ActivityType, ButtonBuilder, ButtonStyle, Client, Collection, EmbedBuilder, Events, GatewayIntentBits, PresenceUpdateStatus, version: DiscordJSVersion, SnowflakeUtil } = require('discord.js');
-const { CachedDatabase, Functions, SkybotDatabase, SkybotDatabaseHandler, SkyblockTypes, extendNativeClasses, version: SkyblockHelperVersion } = require('./SkyblockHelper/src/index');
+const { ActionRowBuilder, ActivityType, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, Events, GatewayIntentBits, PresenceUpdateStatus, version: DiscordJSVersion, SnowflakeUtil } = require('discord.js');
+const { CachedDatabase, Functions, SkybotClient, SkybotDatabase, SkybotDatabaseHandler, SkyblockTypes, extendNativeClasses, version: SkyblockHelperVersion } = require('./SkyblockHelper/src/index');
 const { RESTEvents } = require('@discordjs/rest');
 
 const wait = require('util').promisify(setTimeout);
@@ -15,98 +15,23 @@ const deployCommands = require('./deploy-commands');
 const { getUTCTime, msToHMSMs, makeid, calcTime, getRandomNumber, commafy, objToMap, mapToObj, parseTime } = Functions;
 
 const chalk = require('chalk');
-const maidObj_v12 = require('./maidObj').v12;
 const mineUnlocks = new Map();
 const chopUnlocks = new Map();
 const achievements = require('./achievements');
 const userCmdInfos = new Collection();
 const { updates, levelReq, betaToken } = require('./config.json');
+const LocalDB = require('./localDb.json');
 
 
 
 
-
-// Make a custom client exclusive for Skybot
-class SkybotClient extends Client {
-	/**
-	 * 
-	 * @param {import ('discord.js').ClientOptions} options 
-	 */
-	constructor(options) {
-		super(options);
-
-		/**
-		 * @type {Collection<string, import ('discord.js').SkybotAchievementData}
-		 */
-		this.achievements = new Collection();
-
-		/**
-		 * @type {Collection<string, import ('discord.js').AssetMapValues>}
-		 */
-		this.textCommands = new Collection();
-
-		/**
-		 * @type {Collection<string, import ('discord.js').SlashCommand>}
-		 */
-		this.slashCommands = new Collection();
-
-		/**
-		 * @type {Collection<string, Collection<string, number>}
-		 */
-		this.cooldowns = new Collection();
-
-		/**
-		 * @type {Collection<string, boolean>}
-		 */
-		this.confirmations = new Collection();
-
-		/**
-		 * @type {Collection<string, (import 'discord.js').AssetMapValues>}
-		 */
-		this.assetMap = new Collection();
-
-		/**
-		 * @type {Collection<string, import('discord.js').UserErrorObject>}
-		 */
-		this.bugMap = new Collection();
-
-		/**
-		 * @type {string[]}
-		 */
-		this.console = [`**Logs for ${calcTime('+8')}**`];
-
-		/**
-		 * @type {Collection<string, "🟩" | "🟨" | "🟥">}
-		 */
-		this.errorMap = new Collection();
-
-		/**
-		 * @type {Collection<number, number>}
-		 */
-		this.levelReq = new Collection(levelReq);
-
-		/**
-		 * @type {Collection<string, number>}
-		 */
-		this.updateMap = new Collection(updates);
-
-		/**
-		 * @type {Collection<string, import('discord.js').SkybotCurrencyProfile>}
-		 */
-		this.leaderboard = new Collection();
-
-		this.achievements = new Collection(achievements);
-
-		/**
-		 * @type {Collection<string, any>}
-		 */
-		this.dragonFights = new Collection();
-	}
-}
 
 /* Initiate some classes from the libraries */
-const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzY3MjM1MDcsImlhdCI6MTY3NjYxMTkwNywiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.dDuAXt_c0wqMwwcEWndyrJ20Rhw_RwtyBG5Mnxs9T6ywiARDmSkM1DnUjhS-kiSIlRm4MkTvyhjaZOYhdRGUSw`);
+const db = new Collection();
+db.set(`518736428721635338`, LocalDB.key_518736428721635338);
+db.set(`741536009824501832`, LocalDB.key_741536009824501832);
 /*
+const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzY3MjM1MDcsImlhdCI6MTY3NjYxMTkwNywiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.dDuAXt_c0wqMwwcEWndyrJ20Rhw_RwtyBG5Mnxs9T6ywiARDmSkM1DnUjhS-kiSIlRm4MkTvyhjaZOYhdRGUSw`);
 const db = new SkybotDatabaseHandler()
 	.setDebugMode(true)
 	.setRequestRetries(Infinity)
@@ -153,7 +78,7 @@ const db = new SkybotDatabaseHandler()
 		userObj.mine = mineResolver[userObj.mine];
 
 
-		
+
 		// Flatten Forests
 		if (userObj.forest) {
 			userObj.forest = SkyblockTypes.SkyblockForests.Forest;
@@ -202,30 +127,33 @@ extendNativeClasses(
 );
 
 const client = new SkybotClient(
-	{ 
+	{
 		intents: [
-			GatewayIntentBits.Guilds, 
-			GatewayIntentBits.GuildMembers, 
-			GatewayIntentBits.GuildMessages, 
-			GatewayIntentBits.GuildEmojisAndStickers, 
-			GatewayIntentBits.GuildIntegrations, 
-			GatewayIntentBits.DirectMessages, 
+			GatewayIntentBits.Guilds,
+			GatewayIntentBits.GuildMembers,
+			GatewayIntentBits.GuildMessages,
+			GatewayIntentBits.GuildEmojisAndStickers,
+			GatewayIntentBits.GuildIntegrations,
+			GatewayIntentBits.DirectMessages,
 			GatewayIntentBits.DirectMessageReactions,
 			32767
 		],
-		allowedMentions: { 
-			repliedUser: false 
+		allowedMentions: {
+			repliedUser: false
 		},
 		presence: {
 			activities: [
-				{ 
+				{
 					name: '/tutorial | Starting up!',
 					type: 'PLAYING'
 				}
-			], 
+			],
 			status: PresenceUpdateStatus.Idle
 		},
-		shards: 'auto'
+		shards: 'auto',
+		levelRequirements: levelReq,
+		updateValues: updates,
+		achievements
 	}
 );
 
@@ -234,7 +162,7 @@ const client = new SkybotClient(
 
 // Rejection and Error Handling
 process.on('unhandledRejection', unhandledRejection => {
-	console.error(`An unhandledRejection occured!`);
+	console.log(`${getUTCTime()} [Client]${chalk.redBright(`[Error]`)} | An unhandledRejection occured!`);
 	console.error(unhandledRejection);
 });
 
@@ -272,7 +200,7 @@ let assetsLoadedSuccess = 0,
 
 for (const folder of assetFolders) {
 	const assetFiles = fs.readdirSync(`./assets/${folder}`).filter(file => file.endsWith('.js'));
-	
+
 	for (const file of assetFiles) {
 		const asset = require(`./assets/${folder}/${file}`);
 
@@ -280,24 +208,24 @@ for (const folder of assetFolders) {
 			if ('includeInParsing' in asset) {
 				if (asset.includeInParsing) {
 					client.assetMap.set(asset.keyName, asset);
-					
+
 					assetsLoadedSuccess += 1;
 				} else {
 					client.console.push(`${getUTCTime()} [Asset][Warning] | "${asset?.name}" | ./assets/${folder}/${file} | Your asset had the property "includeInParsing" set to false. This means that your asset will not be included in the assetMap. If this was not intentional, please set the "includeInParsing" property to true and restart the code or use the \`reload-items\` command.`);
 					console.warn(`${getUTCTime()} [Asset]${chalk.yellowBright(`[Warning]`)} | "${asset?.name}" | ./assets/${folder}/${file} | Your asset had the property "includeInParsing" set to false. This means that your asset will not be included in the assetMap. If this was not intentional, please set the "includeInParsing" property to true and restart the code or use the \`reload-items\` command.`);
-					
+
 					assetsLoadedFailure += 1;
 				}
 			} else {
 				client.console.push(`${getUTCTime()} [Asset][Warning] | "${asset?.name}" | ./assets/${folder}/${file} | Your asset didn't have the property "includeInParsing". It will be regarded as false and will not be included in the assetMap. If this was not intentional, please include the "includeInParsing" property and set it to true, then restart the code or use the \`reload-items\` command.`);
 				console.warn(`${getUTCTime()} [Asset]${chalk.redBright(`[Warning]`)} | "${asset?.name}" | ./assets/${folder}/${file} | Your asset didn't have the property "includeInParsing". It will be regarded as false and will not be included in the assetMap. If this was not intentional, please include the "includeInParsing" property and set it to true, then restart the code or use the \`reload-items\` command.`);
-				
+
 				assetsLoadedFailure += 1;
 			}
 		} catch (error) {
 			client.console.push(`${getUTCTime()} [Asset][Error] | "${asset?.name}" | ./assets/${folder}/${file} | ${error}`);
 			console.error(`${getUTCTime()} [Asset]${chalk.redBright(`[Warning]`)} | ${'name' in asset ? `"${asset.name}"` : `""`} | ./assets/${folder}/${file} | ${error}`);
-			
+
 			assetsLoadedFailure += 1;
 		}
 	}
@@ -312,7 +240,7 @@ console.log(`${getUTCTime()} [Asset]${chalk.greenBright(`[Logging]`)} | Successf
 
 
 // Deploys Slash Commands
-deployCommands('851616135592935425', `756000684733759611`, betaToken);
+// deployCommands('851616135592935425', `969415918889369601`, betaToken);
 
 
 
@@ -327,11 +255,11 @@ client.on(Events.Error, error => {
 client.once(Events.ClientReady, async () => {
 	client.user.setPresence({
 		activities: [
-			{ 
+			{
 				name: '/tutorial | Initializing...',
 				type: ActivityType.Playing
 			}
-		], 
+		],
 		status: PresenceUpdateStatus.Idle
 	});
 
@@ -342,14 +270,14 @@ client.once(Events.ClientReady, async () => {
 		try {
 			// eslint-disable-next-line no-await-in-loop
 			await guild.members.fetch();
-		
+
 			GuildIterator += 1;
 			MemberIterator += guild.members.cache.size;
 		} catch (error) {
 			console.error(error);
 		}
 	}
-	
+
 	const timeClientTookToLoad = msToHMSMs(Date.now() - timeCodeStarted);
 
 	client.console.push(`${getUTCTime()} [Client][Logging] | Successfully iterated over ${GuildIterator} guilds, and cached a total of ${MemberIterator} members in ${msToHMSMs(Date.now() - timeLoopStarted)}`);
@@ -373,13 +301,15 @@ client.once(Events.ClientReady, async () => {
 	client.console.push(`${getUTCTime()} [Database][Logging] | Initializing Database...`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Initializing Database...`);
 
+	/*
 	await db.fetchDatabaseEntries([`518736428721635338`]);
 	// await db.init();
+	*/
 
 	client.console.push(`${getUTCTime()} [Database][Logging] | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
 
-	
+
 
 	const noob = await client.users.fetch(`714828907966365747`);
 
@@ -399,11 +329,11 @@ client.once(Events.ClientReady, async () => {
 
 	client.user.setPresence({
 		activities: [
-			{ 
+			{
 				name: '/tutorial | v12.0.0-betaTest',
 				type: ActivityType.Playing
 			}
-		], 
+		],
 		status: PresenceUpdateStatus.Online
 	});
 });
@@ -426,20 +356,20 @@ client.on(Events.InteractionCreate, async interaction => {
 
 	// const shouldBeNull = await db.get(`${maid}start`) ?? null;
 	const { start, update, tutorial } = maidObj;
-	
+
 	const commandInteraction = interaction.isChatInputCommand();
 	const reportAction = interaction.isButton() && interaction.customId.startsWith('report');
 
 	if (commandInteraction) {
 		const slashCommand = client.slashCommands.get(interaction.commandName);
-	
+
 		if (!slashCommand) return;
 
 		/* Is now comment since no person in the current SkybotDatabase is proved to be using the legacy key system.
 		if (
-			shouldBeNull !== null && 
-			interaction.commandName !== `misc` && 
-			interaction.options.getSubcommandGroup(false) !== `fix` && 
+			shouldBeNull !== null &&
+			interaction.commandName !== `misc` &&
+			interaction.options.getSubcommandGroup(false) !== `fix` &&
 			interaction.options.getSubcommand(false) !== `profile`
 		) return interaction.reply(`Hello ${interaction.user}, it seems like you're using the legacy database key system! Please use the \`/fix database\` command in order to update your database keys to the latest version.`);
 		*/
@@ -464,35 +394,35 @@ client.on(Events.InteractionCreate, async interaction => {
 		await handler.verificationHandler();
 
 		if (!slashCommand?.developerOnly) await Util.countCommandUse(maid, maidObj, slashCommand.data.name.toLowerCase(), db);
-	
+
 		if (userCmdInfos.has(maid)) {
 			const userCmdInfo = userCmdInfos.get(maid);
-	
+
 			if (userCmdInfo.interval) {
 				if (userCmdInfo.repeats >= 10) {
 					const num1 = getRandomNumber(6, 10);
 					const num2 = getRandomNumber(1, 5);
-	
-					const equation = getRandomNumber(1, 100) >= 50 
+
+					const equation = getRandomNumber(1, 100) >= 50
 						? ' + '
 						: ' - ';
-	
+
 					const answer = equation === ' + '
 						? num1 + num2
 						: num1 - num2;
-					
+
 					maidObj.verification = {
 						question: `${num1}${equation}${num2}`,
 						answer: answer,
 						ongoing: false
 					};
-	
+
 					await db.set(maid, maidObj);
-	
+
 					userCmdInfos.delete(maid);
 				} else {
 					const intervalToTest = Date.now() - userCmdInfo.timestamp;
-	
+
 					const minTime = Math.floor(userCmdInfo.interval - 1000);
 					const maxTime = Math.ceil(userCmdInfo.interval + 1000);
 					if (minTime < intervalToTest && intervalToTest < maxTime) {
@@ -500,7 +430,7 @@ client.on(Events.InteractionCreate, async interaction => {
 					} else {
 						userCmdInfos.delete(maid);
 					}
-	
+
 					userCmdInfo.timestamp = Date.now();
 				}
 			} else {
@@ -540,7 +470,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 				slashCommand.tutorial.embeds
 					.map(embed => embed.setFooter({ text: `Use the command again for an actual response.` }));
-				
+
 				await db.set(maid, maidObj);
 				await interaction.reply({ embeds: slashCommand.tutorial.embeds, ephemeral: true });
 
@@ -550,20 +480,20 @@ client.on(Events.InteractionCreate, async interaction => {
 
 		if (slashCommand.cooldown && !Functions.getSettingValue(maidObj, 'developerOverride_cooldown')) {
 			const { cooldowns } = client;
-	
+
 			if (!cooldowns.has(slashCommand.data.name)) {
 				cooldowns.set(slashCommand.data.name, new Collection());
 			}
-		
+
 			const now = Date.now();
 			const timestamps = cooldowns.get(slashCommand.data.name);
 			const cooldownAmount = Functions.checkActiveItem(maidObj, 'stopwatch')
 				? Math.ceil(((slashCommand.cooldown || 0) * 1000) - (((slashCommand.cooldown || 0) * 1000) * 0.25))
 				: (slashCommand.cooldown || 0) * 1000;
-			
+
 			if (timestamps.has(interaction.user.id)) {
 				const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
-		
+
 				if (now < expirationTime) {
 					const titles = [
 						"Chill out, man",
@@ -575,31 +505,31 @@ client.on(Events.InteractionCreate, async interaction => {
 						"You're still in cooldown",
 						"You're on cooldown man..."
 					];
-	
+
 					const timeLeft = Math.floor((expirationTime - now) / 1000) === 0 ? 1 : Math.floor((expirationTime - now) / 1000);
-	
+
 					const cdMessage = timeLeft >= 60 ? parseTime(timeLeft) : `${timeLeft.toFixed()} second${timeLeft > 1 ? `s` : ``}`;
-	
+
 					const cooldownMessage = slashCommand?.cooldownMessage?.replace(`{secondsLeft}`, cdMessage) ?? `You can run this command in **${timeLeft.toFixed()} second${timeLeft > 1 ? `s` : ``}**\n`;
 					const cooldownEmbed = new EmbedBuilder()
 						.setColor(`Random`)
 						.setTitle(`${Functions.randomizeArray(titles, 1)}`)
 						.setDescription(cooldownMessage)
 						.setFooter({ text: `Inspired by Dank Memer` });
-	
+
 					const normalCd = slashCommand.cooldown || 0;
 					const stopwatchCd = Math.ceil((slashCommand.cooldown || 0) - ((slashCommand.cooldown || 0) * 0.25));
-					
+
 					if (Functions.checkActiveItem(maidObj, 'stopwatch')) {
 						cooldownEmbed.data.description += `Since you have a <:Stopwatch:950327115558043679> \`stopwatch\` equipped, you only need to wait \`${parseTime(stopwatchCd)}\``;
 					} else {
 						cooldownEmbed.data.description += `The default cooldown is \`${parseTime(normalCd)}\`, but a <:Stopwatch:950327115558043679> \`stopwatch\` decreases this to \`${parseTime(stopwatchCd)}\``;
 					}
-	
+
 					return interaction.reply({ embeds: [cooldownEmbed], ephemeral: true });
 				}
 			}
-		
+
 			timestamps.set(interaction.user.id, now);
 			setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 		}
@@ -611,8 +541,8 @@ client.on(Events.InteractionCreate, async interaction => {
 				return interaction.reply({ content: `❗ Please use \`/start\` to use this command!`, ephemeral: true });
 			} else if (slashCommand.require.update) {
 				if (slashCommand.require.update) {
-					const updateChecker = slashCommand.require.update.slice(3); 
-					
+					const updateChecker = slashCommand.require.update.slice(3);
+
 					const uidVersionValue = client.updateMap.get(update);
 					const cmdVersionValue = client.updateMap.get(updateChecker);
 
@@ -645,7 +575,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 			await client.channels.cache.get('889752463404593163').send(`**⚠ A fatal error occured!**\n\nError reference code: **${refCode}**\n\`\`\`\n${error.stack}\`\`\``);
 
-			if (interaction.replied || interaction?.deferred) {	
+			if (interaction.replied || interaction?.deferred) {
 				await interaction.editReply({ content: `There was an error while executing this command! Error reference code: \`${refCode}\``, ephemeral: true });
 			} else {
 				await interaction.reply({ content: `There was an error while executing this command! Error reference code: \`${refCode}\``, ephemeral: true });
@@ -654,16 +584,16 @@ client.on(Events.InteractionCreate, async interaction => {
 
 		if (start) {
 			/**
-			 * Since we executed a command BEFORE doing this code snippet, there is a 
+			 * Since we executed a command BEFORE doing this code snippet, there is a
 			 * high chance that the object has been changed, so we requery the object again.
-			 * 
+			 *
 			 * @type {RawUserObj}
 			 */
 			const maidObj = await db.get(maid);
 			const userUpdate = client.updateMap.get(update);
-		
+
 			maidObj.lastCmdTimestamp = Date.now();
-		
+
 			const mineFeatureUnlocks = [];
 			let mineXpToSubtract = client.levelReq.get(maidObj.mineLevel) ?? 0,
 				mineLevelChanged = false;
@@ -675,10 +605,10 @@ client.on(Events.InteractionCreate, async interaction => {
 
 			while (maidObj.mineXp >= mineXpToSubtract && maidObj.mineLevel < 50) {
 				maidObj.mineXp -= mineXpToSubtract;
-				maidObj.mineLevel += 1;	
+				maidObj.mineLevel += 1;
 
 				mineXpToSubtract = client.levelReq.get(maidObj.mineLevel) ?? 0;
-				
+
 				if (mineUnlocks.has(maidObj.level)) mineFeatureUnlocks.push(mineUnlocks.get(maidObj.mineLevel));
 
 				mineLevelChanged = true;
@@ -708,10 +638,10 @@ client.on(Events.InteractionCreate, async interaction => {
 					maidObj.chopXp = 0;
 					maidObj.chopLevel = 50;
 				}
-				
+
 				while (maidObj.fishXp >= fishXpToSubtract && maidObj.fishLevel < 50) {
 					maidObj.fishXp -= fishXpToSubtract;
-					maidObj.fishLevel += 1;	
+					maidObj.fishLevel += 1;
 
 					fishXpToSubtract = client.levelReq.get(maidObj.fishLevel) ?? 0;
 
@@ -719,11 +649,11 @@ client.on(Events.InteractionCreate, async interaction => {
 				}
 
 				if (fishLevelChanged) await interaction.channel.send(`${interaction.user} <:Fishing:885390554450501632> Fishing Level Up 🎉\nYou are now Level ${maidObj.fishLevel}`);
-							
+
 				while (maidObj.chopXp > chopXpToSubtract && maidObj.chopLevel < 50) {
 					maidObj.chopXp -= chopXpToSubtract;
-					maidObj.chopLevel += 1;	
-					
+					maidObj.chopLevel += 1;
+
 					chopXpToSubtract = client.levelReq.get(maidObj.chopLevel) ?? 0;
 
 					if (chopUnlocks.has(maidObj.level)) chopFeatureUnlocks.push(chopUnlocks.get(maidObj.chopLevel));
@@ -733,7 +663,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 				if (chopLevelChanged) await interaction.channel.send(`${interaction.user} <:Foraging:849535876357947412> Foraging Level Up 🎉\nYou are now Level ${maidObj.chopLevel}\n\n${chopFeatureUnlocks.length > 0 ? `You unlocked:\n${chopFeatureUnlocks.join('\n')}` : ``}`);
 			}
-	
+
 
 
 
@@ -761,10 +691,10 @@ client.on(Events.InteractionCreate, async interaction => {
 
 
 
-				const profile = { 
-					id: interaction.user.id, 
-					money: coins, 
-					netWorth: maidObj.netWorth, 
+				const profile = {
+					id: interaction.user.id,
+					money: coins,
+					netWorth: maidObj.netWorth,
 					username: interaction.user.username
 				};
 
@@ -785,16 +715,16 @@ client.on(Events.InteractionCreate, async interaction => {
 					maidObj.combatXp = 0;
 					maidObj.combatLevel = 50;
 				}
-	
+
 				while (maidObj.combatXp >= combatXpToSubtract && maidObj.combatLevel < 50) {
 					maidObj.combatXp -= combatXpToSubtract;
-					maidObj.combatLevel += 1;	
-	
+					maidObj.combatLevel += 1;
+
 					combatXpToSubtract = client.levelReq.get(maidObj.combatLevel) ?? 0;
-	
+
 					combatLevelChanged = true;
 				}
-	
+
 				if (combatLevelChanged) await interaction.channel.send(`${interaction.user} <:Combat:946253940863942687> Combat Level Up 🎉\nYou are now Level ${maidObj.combatLevel}`);
 
 
@@ -842,10 +772,10 @@ client.on(Events.InteractionCreate, async interaction => {
 				// This fills achievements that were added sooner, but still don't exist in the maidObj.
 				const achievementData = client.achievements.map(data => ({ id: data.id, done: false }));
 				const existingAchievementIDs = maidObj.achievements.map(achievement => achievement.id);
-				
+
 				for (const achievement of achievementData) {
 					if (!existingAchievementIDs.includes(achievement.id)) maidObj.achievements.push(achievement);
-				} 
+				}
 
 				const completeAchievements = maidObj.achievements
 					.filter(achievement => achievement.done)
@@ -878,7 +808,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	} else if (reportAction) {
 		const userId = interaction.customId.slice(6, 24);
 		const user = client.users.cache.get(userId);
-		const userObj = await db.get(userId); 
+		const userObj = await db.get(userId);
 
 		if (!('bugReport' in userObj)) {
 			userObj.bugReport = {
@@ -928,7 +858,7 @@ client.on(Events.InteractionCreate, async interaction => {
 			userObj.bugReport.resolved += 1;
 		} else if (interaction.customId.endsWith('ignore')) {
 			await interaction.reply({ content: `Please describe why ${user.username}'s bug-report is ignored.` });
-			
+
 			const reason = await interaction.channel.awaitMessages({ filter: msg => msg.author.id === interaction.user.id, max: 1 });
 			await user.send({ content: `Your bug-report has been ignored by the developer.\n\nReason:\n${reason.first().content}` });
 
@@ -1195,11 +1125,11 @@ chopUnlocks.set(20, `:Island: Bamboo Jungle
  * @property {string} name
  * @property {number} status
  * @property {BaseItemData[]} rewards
- * @property {boolean} completed 
+ * @property {boolean} completed
  */
 
 /**
- * @typedef BaseItemData 
+ * @typedef BaseItemData
  * @property {string} name
  * @property {string} keyName
  * @property {string} emoji

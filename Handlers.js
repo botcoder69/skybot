@@ -12,7 +12,7 @@ class CodeHandler {
 		 * @type {User}
 		 */
 		this.user = null;
-		
+
 		/**
 		 * @type {import ('discord.js').RawUserObj}
 		 */

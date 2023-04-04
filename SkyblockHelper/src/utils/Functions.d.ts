@@ -323,6 +323,28 @@ declare module Functions {
 	 * @param retries The amount of times the request will be resent until the method gives up.
 	 */
 	function requestToSkybotDatabase(url: string, requestData: RequestOptions, retries?: number): Promise<any>;
+
+	
+	/**
+	 * Gets the path of a command file. This supports getting files where the name of the command isn't the same as the file name. (Filename: `test.js`; Command: `/dev`);
+	 * @param {Client} client The instance of `Client` to reload the command from.
+	 * @param {string} commandName The command name you want to reload.
+	 * @param {string} commandFolderPath The path for the command folders your bot is using. This has to be the FULL directory path, therefore `path.join()` and `__dirname` are required.
+	 * @returns {string}
+	 */
+	function getCommandFilePath(client: Client, commandName: string, commandFolderPath: string): string;
+
+	/**
+	 * Reloads a slash command
+	 * @param {string} commandName The command name you want to reload.
+	 * @param {string} commandFolderPath The path for the command folders your bot is using. This has to be the FULL directory path, therefore `path.join()` and `__dirname` are required.
+	 * @param {Client} client The instance of `Client` to reload the command from.
+	 * @param {string} token The token for your bot.
+	 * @param {boolean} [apiRequest=false] Whether or not the command should request to the API. If you want to reload the code for the command, this should be set to `false` for convienence, but if the command parameters are included, set this to `true`
+	 * @param {string} [guildId=''] The id of the `Guild` you want to reload the command in. If left blank, this will treat the command as a **Client** `ApplicationCommand`, otherwise, it will treat the command as a **Guild** `ApplicationCommand`
+	 * @returns {Promise<void>}
+	 */
+	function reloadCommand(commandName: string, commandFolderPath: string, client: Client, token: string, apiRequest?: boolean, guildId?: string): Promise<void>
 }
 
 export = Functions;

@@ -8,7 +8,7 @@ const wait = require('util').promisify(setTimeout);
 
 class SelectMenuConfirmation extends EventEmitter {
 	/**
-	 * Creates a SelectMenuBuilder confirmation on a Message! This class has 2 events: `confirmed` and `expired`. The `selection` event fires when the user selects something off the selection menu, the `confirmed` event fires when the user confirms their selection, and the `expired` event fires when the user's time runs out. 
+	 * Creates a SelectMenuBuilder confirmation on a Message! This class has 2 events: `confirmed` and `expired`. The `selection` event fires when the user selects something off the selection menu, the `confirmed` event fires when the user confirms their selection, and the `expired` event fires when the user's time runs out.
 	 */
 	constructor() {
 		super();
@@ -92,7 +92,7 @@ class SelectMenuConfirmation extends EventEmitter {
 
 	/**
 	 * Sets the message of the SelectMenuBuilder. If this message has components, it will be replaced.
-	 * @param {string | (import 'discord.js').MessagePayload | (import 'discord.js').MessageOptions} message 
+	 * @param {string | (import 'discord.js').MessagePayload | (import 'discord.js').MessageOptions} message
 	 */
 	setMenuMessage(message) {
 		this.menuMessage = message;
@@ -109,7 +109,7 @@ class SelectMenuConfirmation extends EventEmitter {
 	}
 
 	/**
-	 * Sets the number of milliseconds the collector waits for interactions. 
+	 * Sets the number of milliseconds the collector waits for interactions.
 	 * @param {number}
 	 */
 	setCollectorTimeout(timeout) {
@@ -119,14 +119,14 @@ class SelectMenuConfirmation extends EventEmitter {
 
 	async runConfirmationMenu() {
 		if (!this.options) throw new SkyblockHelperError(`A SelectMenuConfirmation must have options!`, `SELECT_OPTIONS_RANGE`);
-		
+
 		if (!this.menuMessage) throw new SkyblockHelperError(`A SelectMenuConfirmation must have a menuMessage!`, `SELECT_MESSAGE_RANGE`);
-		
+
 		if (!this.interaction || !(this.interaction instanceof ChatInputCommandInteraction)) throw new SkyblockHelperError(`A SelectMenuConfirmation must have a proper instance of ChatInputCommandInteraction!`, `SELECT_INTERACTION_INSTANCE`);
 
 		const menuOptions = this.options
 			.map(value => {
-				return { 
+				return {
 					default: value?.default ?? false,
 					description: value?.description,
 					emoji: value?.emoji,
@@ -139,7 +139,7 @@ class SelectMenuConfirmation extends EventEmitter {
 			});
 
 		const { interaction } = this;
-		
+
 		const selectRow = new ActionRowBuilder()
 			.addComponents(
 				new SelectMenuBuilder()
@@ -150,7 +150,7 @@ class SelectMenuConfirmation extends EventEmitter {
 		if (this.placeholder) selectRow.components[0].setPlaceholder(this.placeholder);
 
 		if (this.maxValues) selectRow.components[0].setMaxValues(1);
-		
+
 		if (this.minValues) selectRow.components[0].setMinValues(1);
 
 		const confirmRow = new ActionRowBuilder()
@@ -208,11 +208,11 @@ class SelectMenuConfirmation extends EventEmitter {
 			let disabledSelection = false;
 			for (const value of selectMenu.values) {
 				const option = this.options.find(option => option.value === value);
-	
+
 				indexOfSelectMenu = this.options.indexOf(option);
-	
+
 				const disabled = option?.disabled ?? false;
-	
+
 				if (disabled) {
 					disabledSelection = true;
 					break;
@@ -220,11 +220,11 @@ class SelectMenuConfirmation extends EventEmitter {
 			}
 
 			// console.log(selectRow.components[0]);
-	
+
 			for (let i = 0; i < selectRow.components[0].options.length; i++) {
 				selectRow.components[0].options[i].data.default = false;
 			}
-	
+
 			selectRow.components[0].options[indexOfSelectMenu].data.default = true;
 
 			const option = this.options.find(option => option.value === selected[0]);
@@ -233,7 +233,7 @@ class SelectMenuConfirmation extends EventEmitter {
 				if (option.message) {
 					option.message.components = [selectRow, disabledConfirmRow];
 
-					const sentEdit = option.message; 
+					const sentEdit = option.message;
 					selectMenu.update(sentEdit);
 				} else {
 					selectMenu.update({ components: [selectRow, disabledConfirmRow] });
@@ -242,7 +242,7 @@ class SelectMenuConfirmation extends EventEmitter {
 				if (option.message) {
 					option.message.components = [selectRow, confirmRow];
 
-					const sentEdit = option.message; 
+					const sentEdit = option.message;
 					selectMenu.update(sentEdit);
 				} else {
 					selectMenu.update({ components: [selectRow, confirmRow] });
@@ -261,14 +261,16 @@ class SelectMenuConfirmation extends EventEmitter {
 			for (let i = 0; i < selectRow.components[0].options.length; i++) {
 				selectRow.components[0].options[i].default = false;
 			}
-	
+
 			selectRow.components[0].options[indexOfSelectMenu].data.default = true;
 
 			selectRow.components[0].data.disabled = true;
-			
+
 			sent.edit({ components: [selectRow, disabledConfirmRow] });
 
 			if (reason !== `Event.confirmed`) super.emit(`expired`, sent, reason);
+
+			// Bring this up and remove i.deferUpdate();
 		});
 
 		let notEnded = true;

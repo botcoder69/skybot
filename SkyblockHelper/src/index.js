@@ -19,9 +19,6 @@ const DeveloperTypeError = require('./errors/DeveloperTypeError');
 const MentionError = require('./errors/MentionError');
 const MessageError = require('./errors/MessageError');
 
-const AdventureEvent = require('./SkybotAdventureCreator/AdventureEvent');
-const AdventureOutcome = require('./SkybotAdventureCreator/AdventureOutcome');
-const AdventureOutcomeGroup = require('./SkybotAdventureCreator/AdventureOutcomeGroup');
 const CategoryPaginator = require('./actions/CategoryPaginator');
 const CategoryPaginatorGroup = require('./actions/CategoryPaginatorGroup');
 const Confirmation = require('./actions/Confirmation');
@@ -30,27 +27,33 @@ const MultiSelectMenuConfirmation = require(`./actions/MultiSelectMenuConfirmati
 const MultiSelectMenuConfirmationOption = require(`./actions/MultiSelectMenuConfirmationOption`);
 const ReactionConfirmation = require('./actions/ReactionConfirmation');
 const SelectMenuConfirmation = require('./actions/SelectMenuConfirmation');
-const SkybotAdventure = require(`./SkybotAdventureCreator/SkybotAdventure`);
-const SkybotAdventureData = require(`./SkybotAdventureCreator/SkybotAdventureData`);
-const SkybotAdventureHandler = require(`./SkybotAdventureCreator/SkybotAdventureHandler`);
-const SkybotAdventureSelection = require(`./SkybotAdventureCreator/SkybotAdventureSelection`);
+const SkybotBazaarAPI = require(`./actions/SkybotBazaarAPI`);
 const SkybotDatabase = require(`./actions/SkybotDatabase`);
 const SkybotDatabaseHandler = require(`./actions/SkybotDatabaseHandler`);
 const Paginator = require('./actions/Paginator');
 
+const AdventureEvent = require('./SkybotAdventureCreator/AdventureEvent');
+const AdventureOutcome = require('./SkybotAdventureCreator/AdventureOutcome');
+const AdventureOutcomeGroup = require('./SkybotAdventureCreator/AdventureOutcomeGroup');
+const SkybotAdventure = require(`./SkybotAdventureCreator/SkybotAdventure`);
+const SkybotAdventureData = require(`./SkybotAdventureCreator/SkybotAdventureData`);
+const SkybotAdventureHandler = require(`./SkybotAdventureCreator/SkybotAdventureHandler`);
+const SkybotAdventureSelection = require(`./SkybotAdventureCreator/SkybotAdventureSelection`);
+
 const DragonFight = require('./Fight/DragonFight');
 const EnchantmentUtil = require('./Fight/EnchantmentUtil');
+const Mob = require('./Fight/Mob');
+const SkyblockMechanicUtil = require('./Fight/SkyblockMechanicUtil');
+const SkybotStatusEffect = require('./Fight/SkybotStatusEffect');
+const SkybotStatusEffectHandler = require('./Fight/SkybotStatusEffectHandler');
+
 const Functions = require('./utils/Functions');
 const Formatters = require('./formatters/Formatters');
 const FuzzySearchUtil = require('./utils/FuzzySearchUtil');
 const MineGenerators = require('./generators/MineGenerators');
 const Minions = require('./utils/minions/Minions');
-const Mob = require('./Fight/Mob');
-const SkyblockMechanicUtil = require('./Fight/SkyblockMechanicUtil');
 const SkyblockTypes = require('./utils/SkyblockTypes');
 const SkybotClient = require('./utils/SkybotClient');
-const SkybotStatusEffect = require('./Fight/SkybotStatusEffect');
-const SkybotStatusEffectHandler = require('./Fight/SkybotStatusEffectHandler');
 const Crafting = require('./utils/Crafting');
 const extendNativeClasses = require('./utils/extendNativeClasses');
 const SkyblockHelperVersion = require('../package.json').version;
@@ -89,6 +92,7 @@ exports.MultiSelectMenuConfirmation = MultiSelectMenuConfirmation;
 exports.MultiSelectMenuConfirmationOption = MultiSelectMenuConfirmationOption;
 exports.ReactionConfirmation = ReactionConfirmation;
 exports.SelectMenuConfirmation = SelectMenuConfirmation;
+exports.SkybotBazaarAPI = SkybotBazaarAPI;
 exports.SkybotDatabase = SkybotDatabase;
 exports.SkybotDatabaseHandler = SkybotDatabaseHandler;
 exports.Paginator = Paginator;
@@ -102,20 +106,22 @@ exports.SkybotAdventureData = SkybotAdventureData;
 exports.SkybotAdventureHandler = SkybotAdventureHandler;
 exports.SkybotAdventureSelection = SkybotAdventureSelection;
 
-// Utilities and Etc.
+// Fight
 exports.DragonFight = DragonFight;
 exports.EnchantmentUtil = EnchantmentUtil;
+exports.Mob = Mob;
+exports.SkyblockMechanicUtil = SkyblockMechanicUtil;
+exports.SkybotStatusEffect = SkybotStatusEffect;
+exports.SkybotStatusEffectHandler = SkybotStatusEffectHandler;
+
+// Utilities and Etc.
 exports.Functions = Functions;
 exports.Formatters = Formatters;
 exports.FuzzySearchUtil = FuzzySearchUtil;
 exports.MineGenerators = MineGenerators;
 exports.Minions = Minions;
-exports.Mob = Mob;
-exports.SkyblockMechanicUtil = SkyblockMechanicUtil;
 exports.SkyblockTypes = SkyblockTypes;
 exports.SkybotClient = SkybotClient;
-exports.SkybotStatusEffect = SkybotStatusEffect;
-exports.SkybotStatusEffectHandler = SkybotStatusEffectHandler;
 exports.Crafting = Crafting;
 exports.extendNativeClasses = extendNativeClasses;
 exports.version = SkyblockHelperVersion;
