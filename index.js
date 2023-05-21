@@ -3,6 +3,7 @@
 /* Require all the necessary stuff from the libraries */
 const timeCodeStarted = Date.now();
 
+const Database = require('@replit/database');
 const CodeHandler = require('./Handlers');
 const fs = require('fs');
 const Util = require('./Util');
@@ -19,124 +20,26 @@ const mineUnlocks = new Map();
 const chopUnlocks = new Map();
 const achievements = require('./achievements');
 const userCmdInfos = new Collection();
-const { updates, levelReq, betaToken } = require('./config.json');
-const LocalDB = require('./localDb.json');
+const keepAlive = require('./server');
+const { token } = process.env;
+const { updates, levelReq, clientId, guildId } = require('./config.json');
 
 
 
 
 
 /* Initiate some classes from the libraries */
-const db = new Collection();
-db.set(`518736428721635338`, LocalDB.key_518736428721635338);
-db.set(`741536009824501832`, LocalDB.key_741536009824501832);
-/*
-const db = new CachedDatabase(`https://kv.replit.com/v0/eyJhbGciOiJIUzUxMiIsImlzcyI6ImNvbm1hbiIsImtpZCI6InByb2Q6MSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb25tYW4iLCJleHAiOjE2NzY3MjM1MDcsImlhdCI6MTY3NjYxMTkwNywiZGF0YWJhc2VfaWQiOiI0YzBjNmNmNC02YTFhLTQwNDAtYjZlNC1lM2QzMDQ3ZGQzYzgiLCJ1c2VyIjoiQm90Q29kZXI2OSIsInNsdWciOiJTa3lib3REYXRhYmFzZTEifQ.dDuAXt_c0wqMwwcEWndyrJ20Rhw_RwtyBG5Mnxs9T6ywiARDmSkM1DnUjhS-kiSIlRm4MkTvyhjaZOYhdRGUSw`);
-const db = new SkybotDatabaseHandler()
-	.setDebugMode(true)
-	.setRequestRetries(Infinity)
-	.setKeyTreshold(2500)
-	.setDatabases(
-		new SkybotDatabase()
-			.setAuthorization(`SKYBOTDBAUTHurieyt834ytp34gi47ty3p4hi45gg7te34oput394ht94bvow`)
-			.setDatabaseURL(`https://SkybotDatabase1.botcoder69.repl.co`)
-			.setFriendlyName(`Skybot Database 1`),
-		new SkybotDatabase()
-			.setAuthorization(`SKYBOTDBAUTHw4iuuyu9tg4y83gv3gvb34ghh349gnifb24ijgh3i4ughevef`)
-			.setDatabaseURL(`https://SkybotDatabase2.botcoder69.repl.co`)
-			.setFriendlyName(`Skybot Database 2`),
-		new SkybotDatabase()
-			.setAuthorization(`SKYBOTDBAUTH93284fqwg9u8q30q80werg9ufwe2892qeft08f2e08t29r328`)
-			.setDatabaseURL(`https://SkybotDatabase3.botcoder69.repl.co`)
-			.setFriendlyName(`Skybot Database 3`),
-		new SkybotDatabase()
-			.setAuthorization(`SKYBOTDBAUTHrw3879jqwr89035ntiu3ou2ef89324tknfvqqwoiur92353i0`)
-			.setDatabaseURL(`https://SkybotDatabase4.botcoder69.repl.co`)
-			.setFriendlyName(`Skybot Database 4`),
-	)
-	.setInitFailFn(() => {
-		process.exit();
-		// The ping should be able to unlock this in 5 minutes.
-	})
-	.setFormatKeyValueFn(async (userObj, iteration, mapSize) => {
-		Util.fillUndefinedProperties(userObj, maidObj_v12, [`update`, `settings`]);
-
-
-
-		// Flatten Mines
-		const mineResolver = {
-			starter_mine: SkyblockTypes.SkyblockMines.StarterMine,
-			iron_mine: SkyblockTypes.SkyblockMines.IronMine,
-			gold_mine: SkyblockTypes.SkyblockMines.GoldMine,
-			lapis_quarry: SkyblockTypes.SkyblockMines.LapisQuarry,
-			redstone_mine: SkyblockTypes.SkyblockMines.RedstoneMine,
-			diamond_sanctuary: SkyblockTypes.SkyblockMines.DiamondSanctuary,
-			the_end: SkyblockTypes.SkyblockMines.TheEnd,
-			dragons_nest: SkyblockTypes.SkyblockMines.DragonsNest
-		};
-
-		userObj.mine = mineResolver[userObj.mine];
-
-
-
-		// Flatten Forests
-		if (userObj.forest) {
-			userObj.forest = SkyblockTypes.SkyblockForests.Forest;
-		} else if (userObj.roofedForest) {
-			userObj.forest = SkyblockTypes.SkyblockForests.RoofedForest;
-		} else if (userObj.taiga) {
-			userObj.forest = SkyblockTypes.SkyblockForests.Taiga;
-		} else if (userObj.savannah) {
-			userObj.forest = SkyblockTypes.SkyblockForests.Savannah;
-		} else if (userObj.jungle) {
-			userObj.forest = SkyblockTypes.SkyblockForests.Jungle;
-		}
-
-
-
-		// Flatten Minions
-		userObj.placedMinions = userObj.placedMinions
-			.map(minion => {
-				const minionFuelFile = client.assetMap.find(asset => asset.name.toLowerCase() === minion[8]?.toLowerCase());
-				const minionUpgrade1File = client.assetMap.find(asset => asset.name.toLowerCase() === minion[4]?.toLowerCase());
-				const minionUpgrade2File = client.assetMap.find(asset => asset.name.toLowerCase() === minion[6]?.toLowerCase());
-				const minionAutomatedShippingFile = client.assetMap.find(asset => asset.name.toLowerCase() === minion[11]?.toLowerCase());
-
-				return [
-					minion[1],
-					minion[2],
-					minionUpgrade1File?.keyName ?? null,
-					minionUpgrade2File?.keyName ?? null,
-					minionFuelFile?.keyName ?? null,
-					minion[10],
-					minionAutomatedShippingFile?.keyName ?? null,
-					minion[13],
-				];
-			});
-
-		db.debug(`init() | User Values Transformed: ${iteration}/${mapSize}.`);
-
-		return userObj;
-	});
-*/
-extendNativeClasses(
-	{
-		extendArray: true,
-		extendObject: false
-	}
-);
-
+const db = new Database();
 const client = new SkybotClient(
 	{
 		intents: [
-			GatewayIntentBits.Guilds,
-			GatewayIntentBits.GuildMembers,
-			GatewayIntentBits.GuildMessages,
-			GatewayIntentBits.GuildEmojisAndStickers,
-			GatewayIntentBits.GuildIntegrations,
-			GatewayIntentBits.DirectMessages,
-			GatewayIntentBits.DirectMessageReactions,
-			32767
+			GatewayIntentBits.FLAGS.GUILDS,
+			GatewayIntentBits.FLAGS.GUILD_MEMBERS,
+			GatewayIntentBits.FLAGS.GUILD_MESSAGES,
+			GatewayIntentBits.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+			GatewayIntentBits.FLAGS.GUILD_INTEGRATIONS,
+			GatewayIntentBits.FLAGS.DIRECT_MESSAGES,
+			GatewayIntentBits.FLAGS.DIRECT_MESSAGE_REACTIONS
 		],
 		allowedMentions: {
 			repliedUser: false
@@ -144,16 +47,13 @@ const client = new SkybotClient(
 		presence: {
 			activities: [
 				{
-					name: '/tutorial | Starting up!',
+					name: '$$tutorial | Starting up!',
 					type: 'PLAYING'
 				}
 			],
-			status: PresenceUpdateStatus.Idle
+			status: 'idle'
 		},
-		shards: 'auto',
-		levelRequirements: levelReq,
-		updateValues: updates,
-		achievements
+		shards: 'auto'
 	}
 );
 
@@ -263,25 +163,7 @@ client.once(Events.ClientReady, async () => {
 		status: PresenceUpdateStatus.Idle
 	});
 
-	let GuildIterator = 0,
-		MemberIterator = 0;
-	const timeLoopStarted = Date.now();
-	for (const guild of client.guilds.cache.values()) {
-		try {
-			// eslint-disable-next-line no-await-in-loop
-			await guild.members.fetch();
-
-			GuildIterator += 1;
-			MemberIterator += guild.members.cache.size;
-		} catch (error) {
-			console.error(error);
-		}
-	}
-
 	const timeClientTookToLoad = msToHMSMs(Date.now() - timeCodeStarted);
-
-	client.console.push(`${getUTCTime()} [Client][Logging] | Successfully iterated over ${GuildIterator} guilds, and cached a total of ${MemberIterator} members in ${msToHMSMs(Date.now() - timeLoopStarted)}`);
-	console.log(`${getUTCTime()} [Client]${chalk.greenBright(`[Logging]`)} | Successfully iterated over ${GuildIterator} guilds, and cached a total of ${MemberIterator} members in ${Date.now() - timeLoopStarted} milliseconds.`);
 
 	client.console.push(`${getUTCTime()} [Client][Logging] | Ready!`);
 	console.log(`${getUTCTime()} [Client]${chalk.greenBright(`[Logging]`)} | Ready!`);
@@ -295,20 +177,15 @@ client.once(Events.ClientReady, async () => {
 	client.console.push(`${getUTCTime()} [Client][Logging] | Took the client ${timeClientTookToLoad} to get ready.`);
 	console.log(`${getUTCTime()} [Client]${chalk.greenBright(`[Logging]`)} | Took the client ${timeClientTookToLoad} to get ready.`);
 
-
-	const initializeDatabaseTimestamp = Date.now();
+	/*
 
 	client.console.push(`${getUTCTime()} [Database][Logging] | Initializing Database...`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Initializing Database...`);
 
-	/*
-	await db.fetchDatabaseEntries([`518736428721635338`]);
-	// await db.init();
-	*/
-
 	client.console.push(`${getUTCTime()} [Database][Logging] | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
 	console.log(`${getUTCTime()} [Database]${chalk.greenBright(`[Logging]`)} | Database operations have completed in ${msToHMSMs(Date.now() - initializeDatabaseTimestamp)}!`);
 
+	*/
 
 
 	const noob = await client.users.fetch(`714828907966365747`);
@@ -322,10 +199,6 @@ client.once(Events.ClientReady, async () => {
 
 	client.console.push(`${getUTCTime()} [Client][Logging] | All Complete!`);
 	console.log(`${getUTCTime()} [Client]${chalk.greenBright(`[Logging]`)} | All Complete!`);
-
-
-
-
 
 	client.user.setPresence({
 		activities: [
@@ -374,7 +247,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		) return interaction.reply(`Hello ${interaction.user}, it seems like you're using the legacy database key system! Please use the \`/fix database\` command in order to update your database keys to the latest version.`);
 		*/
 
-		if (!tutorial && !start && slashCommand?.require?.start) return interaction.reply(`Hello ${interaction.user}, it seems like you are new! If you want to learn how to play Skybot, you can do so by using \`/tutorial\`!`);
+		if (!tutorial && !start && slashCommand?.require?.start && slashCommand.name) return interaction.reply(`Hello ${interaction.user}, it seems like you are new! If you want to learn how to play Skybot, you can do so by using \`/tutorial\`!`);
 
 		const handler = new CodeHandler()
 			.setClient(client)
@@ -899,7 +772,7 @@ client.console.push(`${getUTCTime()} [Client][Logging] | Preparing to connect to
 console.log(`${getUTCTime()} [Client]${chalk.greenBright(`[Logging]`)} | Preparing to connect to gateway...`);
 
 try {
-	client.login(betaToken);
+	client.login(token);
 } catch (error) {
 	console.log(error);
 }

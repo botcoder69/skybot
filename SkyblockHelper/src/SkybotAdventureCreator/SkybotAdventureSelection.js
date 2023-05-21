@@ -60,11 +60,11 @@ class SkybotAdventureSelection {
 	async runSkybotAdventureSelection() {
 		const { adventureSelections, db, interaction } = this;
 		const maidObj = await db.get(interaction.user.id);
-		
+
 
 
 		const adventureOptions = adventureSelections
-			.map(adventure => ({ 
+			.map(adventure => ({
 				label: adventure.label,
 				description: adventure.description,
 				value: adventure.value,
@@ -78,23 +78,23 @@ class SkybotAdventureSelection {
 							.addFields(
 								{ name: `Name`, value: adventure.info.name, inline: true },
 								{ name: `Description`, value: adventure.info.description, inline: true },
-								{ 
-									name: `Allowed Items`, 
+								{
+									name: `Allowed Items`,
 									value: adventure.info.allowedItems
 										.map(id => interaction.client.assetMap.get(id))
 										.map(item => item.displayEmojiName())
 										.partition((_item, index) => index < 5)
 										.map(item => item.join(' '))
-										.join('\n'), 
-									inline: true 
+										.join('\n'),
+									inline: true
 								}
 							)
 							.setFooter({ text: `Inspired by Dank Memer.` })
 					]
 				}
 			}));
-			
-		
+
+
 		const selectConfirmation = new SelectMenuConfirmation()
 			.setCollectorTimeout(10_000)
 			.setMenuMessage(adventureOptions[0].message)
@@ -178,16 +178,16 @@ class SkybotAdventureSelection {
 					if (style === ButtonStyle.Primary) {
 						confirmedButtons.push(itemButton.data.custom_id);
 					} else {
-						Functions.removeArrayElement(confirmedButtons, itemButton.data.custom_id);							
+						Functions.removeArrayElement(confirmedButtons, itemButton.data.custom_id);
 					}
 				} else if (button.customId === 'start') {
 					if (userHasItem(maidObj, 'adventureTicket')) {
 						await button.deferUpdate();
-					
+
 						collector.stop('User confirmed selection');
 					} else {
 						await button.reply({ content: `You need at least **1x** <:Ticket:955745457181716480> \`Adventure Ticket\` to start an adventure, nice try buddy.`, ephemeral: true });
-					
+
 						collector.stop('User has no ticket');
 					}
 				} else if (button.customId === 'equipAll') {
@@ -213,10 +213,10 @@ class SkybotAdventureSelection {
 					collector.stop('User End Interaction');
 				}
 			});
-		
+
 			collector.on('end', async (_collected, reason) => {
 				const newButtons = Functions.sliceIntoChunks(
-					itemButtons.map(button => button.setDisabled(true)), 
+					itemButtons.map(button => button.setDisabled(true)),
 					5
 				);
 
@@ -292,10 +292,10 @@ class SkybotAdventureSelection {
 /**
  * Check if a user has 1 or more of a specific item.
  * @param {(import 'discord.js').RawUserObj} maidObj
- * @param {string} keyName 
+ * @param {string} keyName
  */
 function userHasItem(maidObj, keyName) {
 	return (maidObj?.[keyName] || 0) > 0;
 }
 
-module.exports = SkybotAdventureSelection;	
+module.exports = SkybotAdventureSelection;

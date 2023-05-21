@@ -77,7 +77,7 @@ async function Crafting(options) {
 
 /**
  * @typedef CraftingOptions
- * @property {string} maid The user id that instantiated this
+ * @property {string} uid The user id that instantiated this
  * @property {(string | number)[][]} items An array containing arrays with the format [display_name: string, skyblock_ID: string, emoji_ID: string, required_amount: number]
  * @property {any} db The Repl.it database. The variable you assigned `new Database()` to
  * @property {?number} [amount=1] How many of the item you want to craft.

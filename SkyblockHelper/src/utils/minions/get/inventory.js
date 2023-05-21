@@ -5,7 +5,7 @@ const { sliceIntoChunks } = require('../../../functions/Functions');
 /**
  *
  * @param {any} db
- * @param {string} maid
+ * @param {string} uid
  * @param {User} messageAuthor
  * @param {Collection<any, any>} itemMap
  * @returns {Promise<(EmbedBuilder)[]>}

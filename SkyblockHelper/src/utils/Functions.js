@@ -331,7 +331,7 @@ class Functions {
 	/**
 	 * Transforms 1 by 1 keys into an object. Requires the Repl.it Database and the user's ID
 	 * @param {Database} db The Repl.it Database
-	 * @param {string} maid The ID of the user that instantiated this
+	 * @param {string} uid The ID of the user that instantiated this
 	 * @param {boolean} [remove=false] Remove keys on object creation
 	 * @param {string[]} [exclude=[]] Keys to be excluded from deletion when deleting keys
 	 * @returns {Promise<RawUserObj>}

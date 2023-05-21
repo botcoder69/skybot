@@ -3,11 +3,11 @@ class SkybotAdventureData {
 	constructor() {
 		this.label = null;
 
-		this.description = null; 
+		this.description = null;
 
-		this.value = null; 
+		this.value = null;
 
-		this.default = null; 
+		this.default = null;
 
 		this.info = null;
 

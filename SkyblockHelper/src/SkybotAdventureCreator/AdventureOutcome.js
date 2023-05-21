@@ -25,7 +25,7 @@ class AdventureOutcome {
 
 		return this;
 	}
-	
+
 	setImage(image) {
 		this.image = image;
 
@@ -34,7 +34,7 @@ class AdventureOutcome {
 
 	/**
 	 * Sets the weight of this outcome. The sum of all weights must be equal to 100.
-	 * @param {number} weight 
+	 * @param {number} weight
 	 */
 	setWeight(weight) {
 		this.weight = weight;
@@ -43,8 +43,8 @@ class AdventureOutcome {
 	}
 
 	/**
-	 * 
-	 * @param {'DEATH' | 'FATAL_DEATH' | 'ITEM_LOSS' | 'NOTHING' | 'REWARD'} type 
+	 *
+	 * @param {'DEATH' | 'FATAL_DEATH' | 'ITEM_LOSS' | 'NOTHING' | 'REWARD'} type
 	 */
 	setType(type) {
 		this.type = type;

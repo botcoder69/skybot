@@ -10,8 +10,8 @@ class AdventureOutcomeGroup {
 		this.button = null;
 	}
 
-	/** 
-	 * @private 
+	/**
+	 * @private
 	 */
 	normalizeOutcomes() {
 		const res = this.outcomes.flat(Infinity);
@@ -44,7 +44,7 @@ class AdventureOutcomeGroup {
 	 */
 	setButton(button) {
 		if (!(button instanceof ButtonBuilder)) throw new SkyblockHelperError('The button of an AdventureOutcomeGroup must be an instance of ButtonBuilder!');
-		
+
 		this.button = button;
 
 		return this;

@@ -5,7 +5,7 @@ const { Collection } = require('discord.js');
  * Collects from a minion in the given number. Since JavaScript arrays are zero-indexed, the number you will give will be subtracted by 1. This can also only be used when you have confirmed getting items from this minion.
  * @param {number} placeValue An index in the minion array, added by 1.
  * @param {any} db Can be the Repl.it `Database` or a `MapDatabase`
- * @param {string} maid The ID of the user that instantiated this.
+ * @param {string} uid The ID of the user that instantiated this.
  * @param {Collection<string, any>} itemMap A collection of the items in Skybot. 
  * @returns {Promise<(string | number)[][]>}
  */

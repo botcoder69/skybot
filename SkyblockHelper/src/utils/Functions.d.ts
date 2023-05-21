@@ -73,7 +73,7 @@ declare module Functions {
 	/**
 	 * Transforms 1 by 1 keys into an object. Requires the Repl.it Database and the user's ID
 	 * @param {Database} db The Repl.it Database
-	 * @param {string} maid The ID of the user that instantiated this
+	 * @param {string} uid The ID of the user that instantiated this
 	 * @param {boolean} [remove=false] Remove keys on object creation
 	 * @param {string[]} [exclude=[]] Keys to be excluded from deletion when deleting keys
 	 */
@@ -220,19 +220,19 @@ declare module Functions {
 
 	/**
 	 * Converts an object's "property: value" structure into a Map.
-	 * @param {{}} obj 
+	 * @param {object} obj 
 	 * @param {Map} mapToUse 
 	 * @returns {void}
 	 */
-	function objToMap<MapType>(obj: {}, mapToUse: MapType): MapType;
+	function objToMap<MapType>(obj: object, mapToUse: MapType): MapType;
 
 	/**
 	 * Converts an Map's "key: value" structure into an Object. Note that all keys will be turned into strings.
 	 * @param {Map} map 
-	 * @param {{}} objToUse 
+	 * @param {object} objToUse 
 	 * @returns {void}
 	 */
-	function mapToObj<MapType>(map: MapType, objToUse: {}): {};
+	function mapToObj<MapType>(map: MapType, objToUse: object): object;
 
 	/**
 	 * This handy function returns a or an whether `word` starts with "a", "e", "i", "o", "u". This is very handy for those persons who don't want to have a big ternary expression just for 'a' and 'an'.

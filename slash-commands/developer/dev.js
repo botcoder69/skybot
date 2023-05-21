@@ -577,6 +577,7 @@ module.exports = {
 					.addFields(
 						{ name: `Input`, value: `\`\`\`js\n${code}\`\`\`` }
 					);
+				const errorEmbed = new EmbedBuilder();
 
 				try {
 					// eslint-disable-next-line no-eval
@@ -588,11 +589,17 @@ module.exports = {
 
 					await i.interaction.editReply({ embeds: [evalEmbed] });
 				} catch (error) {
-					evalEmbed.addFields(
-						{ name: `Output`, value: `\`\`\`\n${error.stack}\`\`\``}
-					);
+					if (error.stack.length > 1024) {
+						errorEmbed.setDescription(`\`\`\`\n${error.stack}\`\`\``);
 
-					await i.interaction.editReply({ embeds: [evalEmbed] });
+						await i.interaction.editReply({ embeds: [evalEmbed, errorEmbed] });
+					} else {
+						evalEmbed.addFields(
+							{ name: `Output`, value: `\`\`\`\n${error.stack}\`\`\``}
+						);
+
+						await i.interaction.editReply({ embeds: [evalEmbed] });
+					}
 				}
 			} catch (error) {
 				console.error(error);

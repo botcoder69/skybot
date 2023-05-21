@@ -192,7 +192,7 @@ declare module 'SkyblockHelper' {
 		/**
 		 * Gets a users minion inventory.
 		 * @param {any} db The variable you set your `new Database()` to.
-		 * @param {string} maid The id of the message author that instantiated this.
+		 * @param {string} uid The id of the message author that instantiated this.
 		 * @param {User} messageAuthor The user that instantiated this.
 		 * @param {Collection<any, any>} itemMap The collection of your items.
 		 * @returns {Promise<EmbedBuilder[]>}
@@ -209,7 +209,7 @@ declare module 'SkyblockHelper' {
 		/**
 		 * Gets the minion array, then outputs the total number of resources you collected in the format [["resource", "keyName", "amount", "minionKeyName"]]. Only to be used when you CONFIRMED getting items. This is the function when including minion fuel.
 		 * @param {any} db The variable you set your `new Database()` to. 
-		 * @param {string} maid The id of the message author that instantiated this.
+		 * @param {string} uid The id of the message author that instantiated this.
 		 * @param {Collection<any, any>} itemMap The collection of your items.
 		 * @returns {Promise<(string | number)[][]>} 
 		 */
@@ -218,7 +218,7 @@ declare module 'SkyblockHelper' {
 		/**
 		 * Gets the minion array, then outputs an array of embeds you can put on your page. This is the function when including minion fuel.
 		 * @param {any} db 
-		 * @param {string} maid 
+		 * @param {string} uid 
 		 * @param {User} messageAuthor 
 		 * @param {Collection<any, any>} itemMap 
 		 * @returns {EmbedBuilder[]}
@@ -230,7 +230,7 @@ declare module 'SkyblockHelper' {
 		 * Collects from a minion in the given number. Since JavaScript arrays are zero-indexed, the number you will give will be subtracted by 1. This can also only be used when you have confirmed getting items from this minion.
 		 * @param {number} placeValue An index in the minion array, added by 1.
 		 * @param {any} db Can be the Repl.it `Database` or a `MapDatabase`
-		 * @param {string} maid The ID of the user that instantiated this.
+		 * @param {string} uid The ID of the user that instantiated this.
 		 * @param {Collection<string, any>} itemMap A collection of the items in Skybot. 
 		 * @returns {Promise<(string | number)[][]>}
 		 */
@@ -294,7 +294,7 @@ declare module 'SkyblockHelper' {
 		/**
 		 * Transforms 1 by 1 keys into an object. Requires the Repl.it Database and the user's ID
 		 * @param {Database} db The Repl.it Database
-		 * @param {string} maid The ID of the user that instantiated this
+		 * @param {string} uid The ID of the user that instantiated this
 		 * @param {boolean} [remove=false] Remove keys on object creation
 		 * @param {string[]} [exclude=[]] Keys to be excluded from deletion when deleting keys
 		 */

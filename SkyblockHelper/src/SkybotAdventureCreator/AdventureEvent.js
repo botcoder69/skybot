@@ -5,6 +5,7 @@ const SkyblockHelperError = require('../errors/SkyblockHelperError');
 const AdventureOutcome = require('./AdventureOutcome');
 const AdventureOutcomeGroup = require('./AdventureOutcomeGroup');
 const Functions = require('../utils/Functions');
+const chalk = require('chalk');
 
 class AdventureEventChangeOperator extends Error {
 	constructor(message = ``) {
@@ -17,14 +18,14 @@ class AdventureEventChangeOperator extends Error {
 class AdventureEvent {
 	constructor() {
 		this.db = null;
-		
+
 		this.interaction = null;
 
 		this.content = null;
 
 		/**
 		 * All the outcomeGroups for this AdventureEvent
-		 * @type {AdventureOutcomeGroup[]} outcomeGroups  
+		 * @type {AdventureOutcomeGroup[]} outcomeGroups
 		 */
 		this.outcomeGroups = [];
 
@@ -41,8 +42,8 @@ class AdventureEvent {
 		this.image = null;
 	}
 
-	/** 
-	 * @private 
+	/**
+	 * @private
 	 */
 	validateOutcomes() {
 		for (const outcomeGroup of this.outcomeGroups) {
@@ -56,16 +57,16 @@ class AdventureEvent {
 		}
 	}
 
-	/** 
-	 * @private 
+	/**
+	 * @private
 	 */
 	normalizeOutcomes() {
 		const res = this.outcomeGroups.flat(Infinity);
 		this.outcomeGroups = res;
 	}
 
-	/** 
-	 * @private 
+	/**
+	 * @private
 	 */
 	createAdventureProgressBar(interactions, middle='🟥') {
 		if (interactions <= 4) {
@@ -82,10 +83,10 @@ class AdventureEvent {
 
 	/**
 	 * Performs an Adventure Item Loss.
-	 * @param {(import 'discord.js').RawUserObj} maidObj 
-	 * @param {Message} sent 
+	 * @param {(import 'discord.js').RawUserObj} maidObj
+	 * @param {Message} sent
 	 * @param {AdventureOutcome<'ITEM_LOSS'>} outcome
-	 * @private 
+	 * @private
 	 */
 	async performAdventureItemLoss(maidObj, sent, outcome) {
 		const [itemToTake] = Functions.randomizeArray(maidObj.adventure.items, 1);
@@ -116,10 +117,10 @@ class AdventureEvent {
 
 	/**
 	 * Performs Adventure Death. This simply just ends the adventure. This is different from `AdventureEventCreator#performAdventureFatalDeath()` because this method just ends the adventure, while `AdventureEventCreator#peformAdventureFatalDeath()` ends the adventure and takes all of your items and rewards.
-	 * @param {(import 'discord.js').RawUserObj} maidObj 
-	 * @param {Message} sent 
+	 * @param {(import 'discord.js').RawUserObj} maidObj
+	 * @param {Message} sent
 	 * @param {AdventureOutcome<'DEATH'>} outcome
-	 * @private 
+	 * @private
 	 */
 	async performAdventureDeath(maidObj, sent, outcome) {
 		const { db, interaction } = this;
@@ -140,7 +141,7 @@ class AdventureEvent {
 			.map(item => {
 				const data = [];
 				for (let i = 0; i < item.amount; i += 1) data.push(item.emoji);
-				
+
 				return data;
 			})
 			.flat(Infinity)
@@ -159,8 +160,8 @@ class AdventureEvent {
 				{ name: `Items Found`, value: foundItems, inline: true },
 				{ name: `Coins Found`, value: foundCoins, inline: true },
 				{ name: `Interactions`, value: `${maidObj.adventure.interactions}`, inline: true }
-			);						
-		
+			);
+
 		await sent.reply({ embeds: [adventureSummaryEmbed] });
 
 		for (const item of maidObj.adventure.items) {
@@ -177,11 +178,11 @@ class AdventureEvent {
 	}
 
 	/**
-	 * Performs **Fatal** Adventure Death. This ends the adventure, and takes all the users items. This is different from `AdventureEventCreator#performAdventureDeath()` because this method ends the adventure and takes all the user's items and rewards away, while `AdventureEventCreator#peformAdventureDeath()` only ends the adventure.
-	 * @param {(import 'discord.js').RawUserObj} maidObj 
-	 * @param {Message} sent 
+	 * Performs **Fatal** Adventure Death. This ends the adventure, and takes all the users items. This is different from `AdventureEventCreator#performAdventureFatalDeath()` because this method ends the adventure and takes all the user's items and rewards away, while `AdventureEventCreator#peformAdventureDeath()` only ends the adventure.
+	 * @param {(import 'discord.js').RawUserObj} maidObj
+	 * @param {Message} sent
 	 * @param {AdventureOutcome<'FATAL_DEATH'>} outcome
-	 * @private 
+	 * @private
 	 */
 	async performAdventureFatalDeath(maidObj, sent, outcome) {
 		const { db, interaction } = this;
@@ -206,8 +207,8 @@ class AdventureEvent {
 				{ name: `Items Found`, value: ' - ', inline: true },
 				{ name: `Coins Found`, value: ' - ', inline: true },
 				{ name: `Interactions`, value: `${maidObj.adventure.interactions}`, inline: true }
-			);						
-		
+			);
+
 		await interaction.followUp({ embeds: [adventureSummaryEmbed] });
 
 		// eslint-disable-next-line require-atomic-updates
@@ -218,11 +219,11 @@ class AdventureEvent {
 
 	/**
 	 * Performs an Adventure Reward.
-	 * @param {(import 'discord.js').RawUserObj} maidObj 
-	 * @param {Message} sent 
+	 * @param {(import 'discord.js').RawUserObj} maidObj
+	 * @param {Message} sent
 	 * @param {AdventureOutcome<'REWARD'>} outcome
 	 * @param {{ luckyItems: { luck: number; name: string; emoji: string; }[]; totalLuck: number; }} luckObj
-	 * @private 
+	 * @private
 	 */
 	async performAdventureReward(maidObj, sent, outcome, luckObj) {
 		const { db, interaction } = this;
@@ -265,13 +266,13 @@ class AdventureEvent {
 
 	/**
 	 * Performs the 'Nothing Interesting Happened' event.
-	 * @param {(import 'discord.js').RawUserObj} maidObj 
-	 * @param {Message} sent 
+	 * @param {(import 'discord.js').RawUserObj} maidObj
+	 * @param {Message} sent
 	 * @param {AdventureOutcome<'NOTHING'>} outcome
 	 * @param {{ luckyItems: { luck: number; name: string; emoji: string; }[]; totalLuck: number; }} luckObj
-	 * @private 
+	 * @private
 	 */
-	async performAdventureNothing(maidObj, sent, outcome) {		
+	async performAdventureNothing(maidObj, sent, outcome) {
 		const { db, interaction } = this;
 
 		const outcomeEmbed = new EmbedBuilder()
@@ -286,7 +287,7 @@ class AdventureEvent {
 	}
 
 	/**
-	 * @param {(import 'discord.js').BaseItemData[]} items 
+	 * @param {(import 'discord.js').BaseItemData[]} items
 	 * @private
 	 */
 	addAdventureLuck(items) {
@@ -339,7 +340,7 @@ class AdventureEvent {
 					{
 						luck: Functions.getRandomNumber(1, 100) > 75 ? luckFactor.weakLuck : luckFactor.goodLuck,
 						name: item.name,
-						emoji: item.emoji,
+						emoji: item.emoji
 					}
 				);
 			}
@@ -366,8 +367,8 @@ class AdventureEvent {
 
 	/**
 	 * Set the ChatInputCommandInteraction instance for this `AdventureEvent`
-	 * @param {ChatInputCommandInteraction} interaction 
-	 * @returns 
+	 * @param {ChatInputCommandInteraction} interaction
+	 * @returns
 	 */
 	setInteractionInstance(interaction) {
 		if (!(interaction instanceof ChatInputCommandInteraction)) throw new SkyblockHelperError(`Expected instanceof ChatInputCommandInteraction for variable "interaction"!`, `INTERACTION_VARIABLE_VALUE`);
@@ -396,8 +397,8 @@ class AdventureEvent {
 
 	/**
 	 * Sets the outcomeGroups for this AdventureEvent
-	 * @param  {AdventureOutcome[] | AdventureOutcome[][]} outcomeGroups 
-	 * @returns 
+	 * @param  {AdventureOutcome[] | AdventureOutcome[][]} outcomeGroups
+	 * @returns
 	 */
 	setOutcomeGroups(...outcomeGroups) {
 		this.outcomeGroups = outcomeGroups;
@@ -408,7 +409,7 @@ class AdventureEvent {
 
 	/**
 	 * Sets "debug" mode to true. This will console.log() important stuff thats happening.
-	 * @param {boolean} debugMode 
+	 * @param {boolean} debugMode
 	 */
 	setDebugMode(debugMode, globalSet) {
 		if (!globalSet) {
@@ -426,8 +427,8 @@ class AdventureEvent {
 
 	/**
 	 * Adds outcomeGroups to this AdventureEvent
-	 * @param  {AdventureOutcome[] | AdventureOutcome[][]} outcomeGroups 
-	 * @returns 
+	 * @param  {AdventureOutcome[] | AdventureOutcome[][]} outcomeGroups
+	 * @returns
 	 */
 	addOutcomeGroups(...outcomeGroups) {
 		this.outcomeGroups.push(outcomeGroups);
@@ -438,8 +439,8 @@ class AdventureEvent {
 
 	/**
 	 * Add an outcome to this AdventureEvent
-	 * @param  {AdventureOutcome} outcomeGroups 
-	 * @returns 
+	 * @param  {AdventureOutcome} outcomeGroups
+	 * @returns
 	 */
 	addOutcomeGroup(outcome) {
 		this.outcomeGroups.push(outcome);
@@ -483,7 +484,7 @@ class AdventureEvent {
 	 * @returns {Promise<void>}
 	 */
 	async runAdventureEvent() {
-		if (this.debug) console.log(`Mode 'DEBUG' has been set to TRUE.`);
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Mode 'DEBUG' has been set to TRUE.`);
 
 		const { image, content, db, interaction, type, outcomeGroups } = this;
 		const maid = interaction.user.id;
@@ -534,14 +535,14 @@ class AdventureEvent {
 				eventEmbed.setImage(image);
 
 				await sent.edit({ embeds: [eventEmbed], components: [disabledChoiceRow] });
-		
+
 				interactions += 1;
 			} catch (error) {
 				await sent.edit({ components: [disabledChoiceRow] });
 
 				expInteractions += 1;
 			}
-		} else {			
+		} else {
 			this.validateOutcomes();
 
 			const choiceEmbed = new EmbedBuilder()
@@ -581,7 +582,7 @@ class AdventureEvent {
 						time: 10_000
 					}
 				);
-	
+
 				await sent.edit({ components: [disabledChoiceRow] });
 
 				const outcomeGroup = this.outcomeGroups.find(group => group.button.data.custom_id === button.customId);
@@ -595,7 +596,7 @@ class AdventureEvent {
 				const badOutcomes = outcomeGroup.outcomes.filter(outcome => outcome.type !== 'REWARD' && outcome.type !== 'NOTHING').length ?? 0;
 				const badLuckEach = Math.ceil(luckObj.totalLuck / badOutcomes);
 
-				if (this.debug) console.log(`goodLuckEach: ${goodLuckEach}\nbadLuckEach: ${badLuckEach}\noutcomeRng: ${outcomeRng}`);
+				if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | goodLuckEach: ${goodLuckEach}\nbadLuckEach: ${badLuckEach}\noutcomeRng: ${outcomeRng}`);
 
 				let accumulatedRng = 0;
 				const parsedOutcomes = outcomeGroup.outcomes
@@ -614,7 +615,7 @@ class AdventureEvent {
 								rng: outcome.weight + accumulatedRng,
 								outcome: outcome
 							};
-							
+
 							accumulatedRng += outcome.weight;
 
 							return res;
@@ -623,57 +624,57 @@ class AdventureEvent {
 								rng: (outcome.weight - badLuckEach) + accumulatedRng,
 								outcome: outcome
 							};
-							
+
 							accumulatedRng += (outcome.weight - badLuckEach);
 
 							return res;
 						}
 					});
 
-				if (this.debug) console.log(parsedOutcomes);
+				if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} |`, parsedOutcomes);
 
 				const outputOutcome = parsedOutcomes.find(parsedOutcome => {
-					if (this.debug) console.log(`${outcomeRng} <= ${parsedOutcome.rng}`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | ${outcomeRng} <= ${parsedOutcome.rng}`);
 
 					return outcomeRng <= parsedOutcome.rng;
 				});
 
-				if (this.debug) console.log(outputOutcome);
+				if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} |`, outputOutcome);
 
 				const outcomeType = outputOutcome.outcome.type;
 
 				if (outcomeType === 'DEATH') {
-					if (this.debug) console.log(`Performing AdventureEvent#performAdventureDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Performing AdventureEvent#performAdventureDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 
 					await this.performAdventureDeath(maidObj, sent, outputOutcome.outcome);
 
-					if (this.debug) console.log(`Finished performing AdventureEvent#performAdventureDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Finished performing AdventureEvent#performAdventureDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 				} else if (outcomeType === 'FATAL_DEATH') {
-					if (this.debug) console.log(`Performing AdventureEvent#performAdventureFatalDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
-					
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Performing AdventureEvent#performAdventureFatalDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+
 					await this.performAdventureFatalDeath(maidObj, sent, outputOutcome.outcome);
 
-					if (this.debug) console.log(`Finished performing AdventureEvent#performAdventureFatalDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Finished performing AdventureEvent#performAdventureFatalDeath() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 				} else if (outcomeType === 'ITEM_LOSS') {
-					if (this.debug) console.log(`Performing AdventureEvent#performAdventureItemLoss() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Performing AdventureEvent#performAdventureItemLoss() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 
 					await this.performAdventureItemLoss(maidObj, sent, outputOutcome.outcome);
 
-					if (this.debug) console.log(`Finished performing AdventureEvent#performAdventureItemLoss() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Finished performing AdventureEvent#performAdventureItemLoss() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 				} else if (outcomeType === 'NOTHING') {
-					if (this.debug) console.log(`Performing AdventureEvent#performAdventureNothing() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Performing AdventureEvent#performAdventureNothing() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 
 					await this.performAdventureNothing(maidObj, sent, outputOutcome.outcome);
-					
-					if (this.debug) console.log(`Finished performing AdventureEvent#performAdventureNothing() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Finished performing AdventureEvent#performAdventureNothing() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 				} else {
-					if (this.debug) console.log(`Performing AdventureEvent#performAdventureReward() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Performing AdventureEvent#performAdventureReward() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 
 					await this.performAdventureReward(maidObj, sent, outputOutcome.outcome, luckObj);
 
-					if (this.debug) console.log(`Finished performing AdventureEvent#performAdventureReward() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
+					if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Finished performing AdventureEvent#performAdventureReward() on AdventureOutcome<'${outputOutcome.outcome.type}'>`);
 				}
-				
+
 				interactions += 1;
 			} catch (error) {
 				console.error(error);
@@ -684,25 +685,28 @@ class AdventureEvent {
 			}
 		}
 
-		if (this.debug) console.log(`interactions: ${interactions}`);
-		if (this.debug) console.log(`expInteractions: ${expInteractions}`);
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | interactions: ${interactions}`);
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | expInteractions: ${expInteractions}`);
 
-		if (this.debug) console.log(`BEFORE maidObj.adventure.interactions: ${maidObj.adventure.interactions}`);
-		if (this.debug) console.log(`BEFORE maidObj.adventure.expInteractions: ${maidObj.adventure.expInteractions}`);
+		/*
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | BEFORE maidObj.adventure.interactions: ${maidObj.adventure.interactions}`);
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | BEFORE maidObj.adventure.expInteractions: ${maidObj.adventure.expInteractions}`);
+		*/
 
 		maidObj.adventure.interactions = interactions;
 		maidObj.adventure.expInteractions = expInteractions;
 
-		if (this.debug) console.log(`AFTER maidObj.adventure.interactions: ${maidObj.adventure.interactions}`);
-		if (this.debug) console.log(`AFTER maidObj.adventure.expInteractions: ${maidObj.adventure.expInteractions}`);
+		/*
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | AFTER maidObj.adventure.interactions: ${maidObj.adventure.interactions}`);
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | AFTER maidObj.adventure.expInteractions: ${maidObj.adventure.expInteractions}`);
+		*/
 
 
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Saving database changes...`);
 
-		if (this.debug) console.log('Saving database changes...');
-		
 		await db.set(maid, maidObj);
-		
-		if (this.debug) console.log('Successfully saved database changes...');
+
+		if (this.debug) console.log(`${Functions.getUTCTime()} [AdventureEvent]${chalk.greenBright(`[Logging]`)} | Successfully saved database changes...`);
 	}
 }
 

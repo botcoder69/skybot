@@ -8,7 +8,7 @@ class MinionsBETA extends null {
 	/**
 	 * Gets the minion array, then returns the total number of resources you collected. This should only be used when you CONFIRMED getting items. This function includes minion fuel.
 	 * @param {Database<import('discord.js').RawUserObj>} db 
-	 * @param {string} maid 
+	 * @param {string} uid 
 	 * @param {Collection<string, import('discord.js').AssetMapValues} assetMap 
 	 * @returns {Promise<MinionOutputData[]>}
 	 */
@@ -81,7 +81,7 @@ class MinionsBETA extends null {
 	/**
 	 * Collects from a minion in the given number. Since JavaScript arrays are zero-indexed, the number you will give will be subtracted by 1. This can also only be used when you have confirmed getting items from this minion.
 	 * @param {Database<import('discord.js').RawUserObj>} db Can be the Repl.it `Database` or a `MapDatabase`
-	 * @param {string} maid The ID of the user that instantiated this.
+	 * @param {string} uid The ID of the user that instantiated this.
 	 * @param {Collection<string, import('discord.js').AssetMapValues>} assetMap A collection of the items in Skybot. 
 	 * @param {number} minionNumber An index in the minion array, added by 1.
 	 * @returns {Promise<MinionOutputData>}

@@ -12,7 +12,7 @@ const DeveloperTypeError = require('../errors/DeveloperTypeError');
 
 /**
  * @param {string} query The item the user wants to search for.
- * @param {string} maid The user id that instantiated this.
+ * @param {string} uid The user id that instantiated this.
  * @param {Collection} assetMap A `Collection` that contains all the assets used in Skybot.
  * @param {Database} db The replit database. The variable you assigned `new Database()` to
  * @param {number} wantedAmount This is how much of the item you want.

@@ -7,7 +7,7 @@ class MineGenerators {
 
 	/**
 	 * Generates cobblestone
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genCobblestone(maid, db) {
@@ -22,7 +22,7 @@ class MineGenerators {
 
 	/**
 	 * Generates coal
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genCoal(maid, db) {
@@ -37,7 +37,7 @@ class MineGenerators {
 
 	/**
 	 * Generates iron ore
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genIronOre(maid, db) {
@@ -52,7 +52,7 @@ class MineGenerators {
 
 	/**
 	 * Generates gold ore
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genGoldOre(maid, db) {
@@ -67,7 +67,7 @@ class MineGenerators {
 
 	/**
 	 * Generates redstone
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genRedstone(maid, db) {
@@ -81,7 +81,7 @@ class MineGenerators {
 
 	/**
 	 * Generates lapis
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genLapis(maid, db) {
@@ -96,7 +96,7 @@ class MineGenerators {
 
 	/**
 	 * Generates diamond
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genDiamond(maid, db) {
@@ -111,7 +111,7 @@ class MineGenerators {
 
 	/**
 	 * Generates diamond blocks (9 diamonds each)
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genDiamondBlock(maid, db) {
@@ -126,7 +126,7 @@ class MineGenerators {
 
 	/**
 	 * Generates enchanted diamonds
-	 * @param {string} maid
+	 * @param {string} uid
 	 * @param {any} db
 	 */
 	static genEnchantedDiamond(maid, db) {
